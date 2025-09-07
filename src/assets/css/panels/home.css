@@ -91,6 +91,7 @@
     align-items: center;
     width: 85%;
     height: 100%;
+    margin-left: 7%;
 }
 
 .titre-tab-new {
@@ -168,25 +169,30 @@
 .social-tab {
     position: absolute;
     display: flex;
-    bottom: 0;
+    bottom: 90;
     right: 0;
-    width: 15%;
+    width: 20%;
+    right: 43%;
     height: calc(80% - 1rem);
     justify-content: center;
     margin-bottom: 1rem;
+    margin-left: 70%;
 }
 
 .social-list {
     border-radius: 10px;
     height: 100%;
+    right: 60%;
 }
 
 .social-block {
     display: flex;
-    background: var(--background-transparent);
-    width: 90px;
-    height: 90px;
-    margin-bottom: 1rem;
+    background: transparent;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 30.5rem;
+    margin-left: 20rem;
+    margin-right: 15rem;
     border-radius: 10px;
     font-size: 2rem;
     cursor: pointer;
@@ -200,6 +206,11 @@
     height: 55%;
     width: 55%;
     filter: var(--svg-color);
+}
+
+.social-block:hover {
+    transform: scale(1.2);
+    transition: transform 0.3s ease-in-out;
 }
 
 /*******************************************************************************

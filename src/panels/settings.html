@@ -1,40 +1,40 @@
 <div class="container">
     <div class="nav-settings">
-        <p>Paramètres</p>
+        <p>Ajustes</p>
         <div class="nav-box">
-            <div id="account" class="nav-settings-btn active-settings-BTN">COMPTES</div>
-            <div id="java" class="nav-settings-btn">JAVA</div>
-            <div id="resolution" class="nav-settings-btn">RESOLUTION</div>
-            <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
-            <div id="save" class="nav-settings-btn">ACCUEIL</div>
+            <div id="account" class="nav-settings-btn active-settings-BTN">CUENTAS</div>
+            <div id="java" class="nav-settings-btn">RAM</div>
+            <div id="resolution" class="nav-settings-btn">RESOLUCIÓN</div>
+            <div id="launcher" class="nav-settings-btn">LAUNCHER INFO</div>
+            <div id="save" class="nav-settings-btn">Cerrar</div>
         </div>
     </div>
 
     <div id="account-tab" class="container-settings active-container-settings">
-        <div class="titre-tab">Comptes joueurs</div>
+        <div class="titre-tab">Cuentas de Jugadores</div>
 
         <div class="accounts-list content-scroll">
             <div class="account" id="add">
                 <div class="add-profile">
                     <div class="icon-account-add"></div>
                 </div>
-                <div class="add-text-profile">Ajouter un compte</div>
+                <div class="add-text-profile">Añadir una cuenta</div>
             </div>
         </div>
     </div>
 
     <div id="java-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Paramètre de votre RAM</div>
+        <div class="titre-tab">Tu configuración de RAM</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Définition de la RAM alloué à votre jeu, une quantité plus important augmenteras les performances de
-                votre jeu.<br>
-                A noter qu'il faut éviter de mettre une trop grande quantité sinon cela peut provoquer des pertes de
-                performances sur vos autres applications.<br><br>
-                <b>-RAM Maximale:</b> Indique la quantité totale de RAM allouée à votre jeu. Il est recommandé de ne pas
-                dépasser 50% de la quantité totale de RAM présente sur votre PC.<br><br>
-                <b>-RAM Minimale:</b> Indique la quantité minimale de RAM allouée au démarrage de votre jeu. Il est
-                recommandé de ne pas mettre plus de 4Go pour cette valeur.
+                Define la RAM asignada a tu juego, una cantidad mayor aumentará el rendimiento del mismo.
+                tu juego.<br>
+                Tenga en cuenta que debe evitar poner demasiado, de lo contrario puede causar pérdida de
+                rendimiento en sus otras aplicaciones.<br><br>
+                <b>-RAM Maximale:</b> Indica la cantidad total de RAM asignada a tu juego. Se recomienda no hacerlo
+                superar el 50% de la cantidad total de RAM presente en su PC.<br><br>
+                <b>-RAM Minimale:</b> Indica la cantidad mínima de RAM asignada cuando se inicia el juego. Es
+                Se recomienda no poner más de 4GB para este valor.
             </div>
             <div class="settings-elements content-evenly">
                 <div class="memory-slider" min="0.5" max="8" step="0.5">
@@ -49,38 +49,22 @@
                     </div>
                 </div>
                 <div class="ram-info-block">
-                    <b>Vous possédez un total de <span id="total-ram">0 Go</span> RAM.</b><br>
-                    <b>Vous possédez un total de <span id="free-ram">0 Go</span> RAM disponible.</b>
+                    <b>Tienes un total de <span id="total-ram">0 GB</span> RAM.</b><br>
+                    <b>Tienes un total de <span id="free-ram">0 GB</span> RAM disponibles.</b>
                 </div>
             </div>
         </div>
 
-        <div class="titre-tab">Emplacement de Java</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Le launcher utilise une version embarquée de Java.<br>
-                Cette version est disponible dans le répertoire :<br><span class="java-path-txt"></span><br>
-                Toutefois, vous pouvez spécifier votre propre exécutable si votre jeu requiert une version de java plus
-                recente.
-            </div>
-            <div class="settings-elements content-evenly">
-                <input type="text" class="java-path-input-text" disabled>
-                <input type="file" class="java-path-input-file" accept="application/octet-stream" />
-                <div class="java-path-box">
-                    <div class="java-path-set java-path-btn">Changer</div>
-                    <div class="java-path-reset java-path-btn">Par defaut</div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <div id="resolution-tab" class="container-settings">
-        <div class="titre-tab">Paramètres de resolution Minecraft</div>
+        <div class="titre-tab">Configuración de resolución de Minecraft</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Définissez une résolution personnalisée afin d'avoir un jeu adapté à votre écran.<br>
-                Par défaut le jeu démarre en 854 X 480,<br>vous pouvez modifier cette valeur pour un confort de jeu
-                optimal. La résolution idéale est de 1280 X 720.
+                Establece una resolución personalizada para tener un juego adaptado a tu pantalla.
+                De forma predeterminada, el juego comienza en 854 X 480,<br>Puedes cambiar este valor para mayor comodidad en el juego.
+                óptimo. La resolución ideal es 1280 X 720.
             </div>
             <div class="settings-elements content-center">
                 <div class="input-size-element">
@@ -88,68 +72,16 @@
                     <div class="size-cross"></div>
                     <input type="number" class="height-size input-resolution">
                 </div>
-                <div class="size-reset size-btn">Par defaut</div>
+                <div class="size-reset size-btn">Por defecto</div>
             </div>
         </div>
     </div>
 
     <div id="launcher-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Paramètre de téléchargement</div>
+        <div class="titre-tab">Información del launcher</div>
         <div class="settings-elements-box">
             <div class="setting-text">
-                Ce paramètre détermine le nombre maximum de fichiers pouvant être téléchargés simultanément lors de la
-                mise à jour ou du téléchargement de ressources.<br><br>
-
-                Veuillez noter que la modification de ce paramètre peut affecter les performances de
-                téléchargement.<br>
-                Il est recommandé de ne pas dépasser les limites recommandées par défaut,<br>
-                sauf si vous rencontrez des problèmes spécifiques de connectivité.
-            </div>
-            <div class="settings-elements content-center">
-                <input type="number" class="max-files input-max-files">
-                <p>Fichiers</p>
-                <div class="max-files-reset max-files-btn">Par defaut</div>
-            </div>
-        </div>
-
-        <div class="titre-tab">Thème clair et sombre</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Choisissez entre le thème clair et le thème sombre pour personnaliser l'apparence du launcher.<br><br>
-
-                La modification du thème peut influencer la lisibilité et l'expérience visuelle.<br>
-                Sélectionnez celui qui vous convient le mieux en fonction de vos préférences.
-            </div>
-            <div class="settings-elements content-center theme-box">
-                <div class="theme-btn theme-btn-clair">Clair</div>
-                <div class="theme-btn theme-btn-sombre">Sombre</div>
-                <div class="theme-btn theme-btn-auto">Automatique</div>
-            </div>
-        </div>
-
-        <div class="titre-tab">Comportement du launcher au démarrage</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Vous pouvez choisir si le launcher se ferme automatiquement ou reste ouvert lorsque vous lancez le jeu.
-            </div>
-
-            <div class="settings-elements content-evenly close-box">
-                <div class="close-launcher close-btn">Fermer le launcher après le démarrage du jeu</div>
-                <div class="close-none close-btn">Garder le launcher ouvert</div>
-                <div class="close-all close-btn">Fermer le jeu si le launcher est fermé</div>
-            </div>
-        </div>
-
-        <!-- <div class="titre-tab">Environnement INTEL</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                pour les jouer avec les proseceurs apple silicon 
-            </div>
-
-            <div class="settings-elements content-evenly close-box">
-                <div class="close-launcher close-btn">Environnement INTEL</div>
-                <div class="close-none close-btn">Environnement SILICON</div>
-            </div>
-        </div> -->
-    </div>
-</div>
+                El Cliente Oficial de Bridge Studio fue creado por @Darken, este cliente está hecho para poder jugar
+                eventos de nuestro studio tanto para no premium como para premiums, si es que tienes algún problema con el
+                launcher puedes informarnos mediante un ticket o a mi discord: @imnotdarken. Gracias por formar parte
+                de este gran studio y de nuestros eventos!!  <br><br>

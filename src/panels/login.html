@@ -1,28 +1,38 @@
 <div class="container">
-    <div class="login-home login-tabs">
-        <div class="login-text">Veuillez vous identifier afin de jouer.</div>
+    <div class="login-select login-tabs">
+        <div class="login-text">¿Cómo quieres iniciar sesión?</div>
 
         <div class="login-options">
-            <button class="connect connect-home">Connexion</button>
-            <button class="cancel cancel-home"  style="display: none;">annuler</button>
+            <button class="connect select-microsoft">Microsoft</button>
+            <button class="connect select-offline">Offline</button>
+        </div>
+    </div>
+
+    <div class="login-home login-tabs">
+        <div class="login-text">Por favor identifícate con Microsoft para jugar.</div>
+
+        <div class="login-options">
+            <button class="connect connect-home">Conectar</button>
+            <button class="cancel cancel-home" style="display: none;">Cancelar</button>
         </div>
     </div>
 
     <div class="login-offline login-tabs">
-        <div class="login-text">Veuillez entrer votre pseudo</div>
+        <div class="login-text">Por favor ingresa tu nick</div>
 
         <div class="input-login">
-            <input type="text" class="email email-offline" placeholder="Pseudo" />
+            <input type="text" class="email email-offline" placeholder="nombre de usuario..." />
         </div>
 
         <div class="login-options">
-            <button class="connect connect-offline">Connexion</button>
-            <button class="cancel cancel-offline" style="display: none;">annuler</button>
+            <button class="connect connect-offline">Conectar offline</button>
+            <button class="cancel cancel-offline" style="display: none;">Cancelar</button>
         </div>
     </div>
 
+
     <div class="login-AZauth login-tabs">
-        <div class="login-text">Veuillez vous connecter afin de jouer.</div>
+        <div class="login-text">Por favor inicia sesión para jugar.</div>
 
         <div class="input-login">
             <input type="text" class="email email-AZauth" placeholder="E-mail" />
@@ -30,21 +40,22 @@
         </div>
 
         <div class="login-options">
-            <button class="connect connect-AZauth">Connexion</button>
-            <button class="cancel cancel-AZauth" style="display: none;">annuler</button>
+            <button class="connect connect-AZauth">Conectar</button>
+            <button class="cancel cancel-AZauth" style="display: none;">Cancelar</button>
         </div>
     </div>
 
+
     <div class="login-AZauth-A2F login-tabs">
-        <div class="login-text">Veuillez entrer le code de sécurité.</div>
+        <div class="login-text">Por favor introduce el código de seguridad.</div>
 
         <div class="input-login">
-            <input type="text" class="A2F A2F-AZauth" placeholder="Code" />
+            <input type="text" class="A2F A2F-AZauth" placeholder="Código de seguridad" />
         </div>
 
         <div class="login-options">
-            <button class="connect connect-AZauth-A2F">Valider</button>
-            <button class="cancel cancel-AZauth-A2F">annuler</button>
+            <button class="connect connect-AZauth-A2F">Validar</button>
+            <button class="cancel cancel-AZauth-A2F">Cancelar</button>
         </div>
     </div>
 </div>

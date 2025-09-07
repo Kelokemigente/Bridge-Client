@@ -1,6 +1,6 @@
 /**
- * @author Luuxis
- * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
+ * @author Darken
+ * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 
 "use strict";
@@ -23,13 +23,15 @@ function destroyWindow() {
 function createWindow() {
     destroyWindow();
     updateWindow = new BrowserWindow({
-        title: "Mise à jour",
+        title: "Actualizando",
         width: 400,
         height: 500,
         resizable: false,
-        icon: `./src/assets/images/icon.${os.platform() === "win32" ? "ico" : "png"}`,
+        transparent: true, 
         frame: false,
         show: false,
+        icon: `./src/assets/images/icon.${os.platform() === "win32" ? "ico" : "png"}`,
+        backgroundColor: '#00000000', 
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true

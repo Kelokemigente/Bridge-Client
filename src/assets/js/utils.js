@@ -1,6 +1,6 @@
 /**
- * @author Luuxis
- * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
+ * @author Darken
+ * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
 
 const { ipcRenderer } = require('electron')
@@ -16,27 +16,13 @@ import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
 
 async function setBackground(theme) {
-    if (typeof theme == 'undefined') {
-        let databaseLauncher = new database();
-        let configClient = await databaseLauncher.readData('configClient');
-        theme = configClient?.launcher_config?.theme || "auto"
-        theme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
-    }
-    let background
     let body = document.body;
-    body.className = theme ? 'dark global' : 'light global';
-    if (fs.existsSync(`${__dirname}/assets/images/background/easterEgg`) && Math.random() < 0.005) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/easterEgg`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `url(./assets/images/background/easterEgg/${Background})`;
-    } else if (fs.existsSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`)) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${theme ? 'dark' : 'light'}/${Background})`;
-    }
-    body.style.backgroundImage = background ? background : theme ? '#000' : '#fff';
+    body.className = theme ? 'dark global' : 'dark global';
+    let backgroundPath = './assets/images/background/dark/1.png';
+    body.style.backgroundImage = `linear-gradient(#00000000, #00000080), url(${backgroundPath})`;
     body.style.backgroundSize = 'cover';
 }
+
 
 async function changePanel(id) {
     let panel = document.querySelector(`.${id}`);
