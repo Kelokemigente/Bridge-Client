@@ -114,10 +114,10 @@ class Home {
         let instanceCloseBTN = document.querySelector('.close-popup')
 
         // Ocultar botón + si hay solo una instancia
-        if (instancesList.length === 1) {
-            instanceSelectBTN.style.display = 'none'
-            playBTN.style.paddingRight = '0'
-        }
+//        if (instancesList.length === 1) {
+//            instanceSelectBTN.style.display = 'none'
+//            playBTN.style.paddingRight = '0'
+//        }
 
         // Si no hay instancia seleccionada, asigna una por defecto
         if (!instanceSelect) {
