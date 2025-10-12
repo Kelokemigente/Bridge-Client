@@ -40,6 +40,11 @@
     text-align: center;
     margin: 0.5rem 0;
     cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.nav-settings-btn:hover {
+    transform: scale(1.1);
 }
 
 .active-settings-BTN {
@@ -56,7 +61,6 @@
     height: calc(100% - 26px);
     opacity: 0;
     pointer-events: none;
-
 }
 
 .settings-elements-box {
@@ -106,9 +110,7 @@
 }
 
 /*******************************************************************************
- *                                                                             *
- * account tab                                                                 *
- *                                                                             *
+ * account tab
  ******************************************************************************/
 .accounts-list {
     max-height: 90%;
@@ -168,7 +170,6 @@
     text-align: center;
     width: 10rem;
     pointer-events: none;
-
 }
 
 .profile-pseudo {
@@ -177,7 +178,6 @@
     white-space: nowrap;
     font-size: 1.5rem;
     pointer-events: none;
-
 }
 
 .profile-uuid {
@@ -185,7 +185,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
-
 }
 
 .delete-profile {
@@ -199,6 +198,11 @@
     align-items: center;
     color: #ff2c2c;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.delete-profile:hover {
+    transform: scale(1.1);
 }
 
 .delete-profile-icon {
@@ -206,9 +210,7 @@
 }
 
 /*******************************************************************************
- *                                                                             *
- * java tab                                                                    *
- *                                                                             *
+ * java tab
  ******************************************************************************/
 
 .memory-slider {
@@ -305,13 +307,17 @@
     border-radius: 15px;
     margin: 0 1rem;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.java-path-btn:hover {
+    transform: scale(1.1);
 }
 
 /*******************************************************************************
- *                                                                             *
- * resolution tab                                                              *
- *                                                                             *
+ * resolution tab
  ******************************************************************************/
+
 .input-size-element {
     display: flex;
     align-items: center;
@@ -342,14 +348,16 @@
     border-radius: 15px;
     margin: 0 1rem;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.size-btn:hover {
+    transform: scale(1.1);
 }
 
 /*******************************************************************************
- *                                                                             *
- * Launcher tab                                                                *
- *                                                                             *
+ * Launcher tab
  ******************************************************************************/
-
 .input-max-files {
     background: var(--shadow);
     border: none;
@@ -359,6 +367,7 @@
     text-align: center;
     width: 4rem;
     margin-right: 1rem;
+    font-size: 1.1rem;
 }
 
 .max-files-btn {
@@ -367,6 +376,12 @@
     border-radius: 15px;
     margin: 0 1rem;
     cursor: pointer;
+    transition: transform 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.max-files-btn:hover {
+    transform: scale(1.1);
 }
 
 .theme-btn {
@@ -374,6 +389,12 @@
     padding: calc(0.1rem + 4px) calc(1.5rem + 4px);
     border-radius: 15px;
     cursor: pointer;
+    transition: transform 0.2s ease;
+    font-size: 1.1rem;
+}
+
+.theme-btn:hover {
+    transform: scale(1.1);
 }
 
 .theme-btn-clair {
@@ -399,13 +420,18 @@
 }
 
 .close-btn {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     width: 200px;
     text-align: center;
     border: 4px solid var(--color);
     border-radius: 15px;
     padding: 1rem;
     cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-btn:hover {
+    transform: scale(1.1);
 }
 
 .active-close {
