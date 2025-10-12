@@ -148,7 +148,7 @@
     align-items: center;
     width: 90px;
     height: 100vh;
-    background: var(--background-element);
+    background: var(--background-transparent);
     position: fixed;
     top: 0;
     left: 0;
@@ -183,7 +183,7 @@
     height: 3rem;
     font-size: 3rem;
     color: var(--element-color);
-    margin: 580px 1.5rem 50px 1.5rem; /* bajar más abajo */
+    margin: 30px 1.5rem 50px 1.5rem; /* bajar más abajo */
     transition: transform 0.3s ease-in-out;
 }
 
@@ -442,7 +442,7 @@
     background-repeat: no-repeat;
     height: 55%;
     width: 55%;
-    filter: var(--svg-color);
+    color: white;
 }
 
 .no-instances {

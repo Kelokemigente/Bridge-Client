@@ -111,10 +111,10 @@ class Home {
         let instancesListPopup = document.querySelector('.instances-List')
         let instanceCloseBTN = document.querySelector('.close-popup')
 
-        if (instancesList.length === 1) {
-            document.querySelector('.instance-select').style.display = 'none'
-            instanceBTN.style.paddingRight = '0'
-        }
+// if (instancesList.length === 1) {
+//     document.querySelector('.instance-select').style.display = 'none'
+//     instanceBTN.style.paddingRight = '0'
+// }
 
         if (!instanceSelect) {
             let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
