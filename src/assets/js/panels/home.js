@@ -9,6 +9,7 @@ const { shell, ipcRenderer } = require('electron')
 
 class Home {
     static id = "home";
+
     async init(config) {
         this.config = config;
         this.db = new database();
@@ -40,7 +41,7 @@ class Home {
                         <div class="bbWrapper">
                             <p>Puedes seguir todas las novedades relativas al servidor aquí.</p>
                         </div>
-                    </div>`
+                    </div>`;
                 newsElement.appendChild(blockNews);
             } else {
                 for (let News of news) {
@@ -63,7 +64,7 @@ class Home {
                                 <p>${News.content.replace(/\n/g, '</br>')}</p>
                                 <p class="news-author">- <span>${News.author}</span></p>
                             </div>
-                        </div>`
+                        </div>`;
                     newsElement.appendChild(blockNews);
                 }
             }
@@ -72,30 +73,30 @@ class Home {
             blockNews.classList.add('news-block');
             blockNews.innerHTML = `
                 <div class="news-header">
-                        <img class="server-status-icon" src="assets/images/icon.png">
-                        <div class="header-text">
-                            <div class="title">Error.</div>
-                        </div>
-                        <div class="date">
-                            <div class="day">25</div>
-                            <div class="month">Abril</div>
-                        </div>
+                    <img class="server-status-icon" src="assets/images/icon.png">
+                    <div class="header-text">
+                        <div class="title">Error.</div>
                     </div>
-                    <div class="news-content">
-                        <div class="bbWrapper">
-                            <p>No se puede contactar con el servidor de noticias.</br>Por favor verifique su configuración.</p>
-                        </div>
-                    </div>`
+                    <div class="date">
+                        <div class="day">25</div>
+                        <div class="month">Abril</div>
+                    </div>
+                </div>
+                <div class="news-content">
+                    <div class="bbWrapper">
+                        <p>No se puede contactar con el servidor de noticias.</br>Por favor verifique su configuración.</p>
+                    </div>
+                </div>`;
             newsElement.appendChild(blockNews);
         }
     }
 
     socialLick() {
         let socials = document.querySelectorAll('.social-block')
-
         socials.forEach(social => {
             social.addEventListener('click', e => {
-                shell.openExternal(e.target.dataset.url)
+                const block = e.currentTarget;
+                shell.openExternal(block.dataset.url)
             })
         });
     }
@@ -106,16 +107,19 @@ class Home {
         let instancesList = await config.getInstanceList()
         let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct) ? configClient?.instance_selct : null
 
-        let instanceBTN = document.querySelector('.play-instance')
+        let playBTN = document.querySelector('.play-instance')
+        let instanceSelectBTN = document.querySelector('.instance-select') // 🔹 Botón "+"
         let instancePopup = document.querySelector('.instance-popup')
         let instancesListPopup = document.querySelector('.instances-List')
         let instanceCloseBTN = document.querySelector('.close-popup')
 
-// if (instancesList.length === 1) {
-//     document.querySelector('.instance-select').style.display = 'none'
-//     instanceBTN.style.paddingRight = '0'
-// }
+        // Ocultar botón + si hay solo una instancia
+        if (instancesList.length === 1) {
+            instanceSelectBTN.style.display = 'none'
+            playBTN.style.paddingRight = '0'
+        }
 
+        // Si no hay instancia seleccionada, asigna una por defecto
         if (!instanceSelect) {
             let newInstanceSelect = instancesList.find(i => i.whitelistActive == false)
             let configClient = await this.db.readData('configClient')
@@ -124,6 +128,7 @@ class Home {
             await this.db.updateData('configClient', configClient)
         }
 
+        // Actualizar estado de servidor
         for (let instance of instancesList) {
             if (instance.whitelistActive) {
                 let whitelist = instance.whitelist.find(whitelist => whitelist == auth?.name)
@@ -141,14 +146,43 @@ class Home {
             if (instance.name == instanceSelect) setStatus(instance.status)
         }
 
+        // 🔹 Evento para abrir popup desde el botón "+"
+        instanceSelectBTN.addEventListener('click', async () => {
+            let configClient = await this.db.readData('configClient')
+            let auth = await this.db.readData('accounts', configClient.account_selected)
+
+            instancesListPopup.innerHTML = ''
+            for (let instance of instancesList) {
+                if (instance.whitelistActive) {
+                    instance.whitelist.map(whitelist => {
+                        if (whitelist == auth?.name) {
+                            instancesListPopup.innerHTML += `
+                                <div id="${instance.name}" class="instance-elements ${instance.name == instanceSelect ? 'active-instance' : ''}">
+                                    ${instance.name}
+                                </div>`
+                        }
+                    })
+                } else {
+                    instancesListPopup.innerHTML += `
+                        <div id="${instance.name}" class="instance-elements ${instance.name == instanceSelect ? 'active-instance' : ''}">
+                            ${instance.name}
+                        </div>`
+                }
+            }
+
+            instancePopup.style.display = 'flex'
+        })
+
+        // 🔹 Cerrar popup
+        instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none')
+
+        // 🔹 Seleccionar instancia
         instancePopup.addEventListener('click', async e => {
             let configClient = await this.db.readData('configClient')
-
             if (e.target.classList.contains('instance-elements')) {
                 let newInstanceSelect = e.target.id
                 let activeInstanceSelect = document.querySelector('.active-instance')
-
-                if (activeInstanceSelect) activeInstanceSelect.classList.toggle('active-instance');
+                if (activeInstanceSelect) activeInstanceSelect.classList.remove('active-instance');
                 e.target.classList.add('active-instance');
 
                 configClient.instance_selct = newInstanceSelect
@@ -161,40 +195,10 @@ class Home {
             }
         })
 
-        instanceBTN.addEventListener('click', async e => {
-            let configClient = await this.db.readData('configClient')
-            let instanceSelect = configClient.instance_selct
-            let auth = await this.db.readData('accounts', configClient.account_selected)
-
-            if (e.target.classList.contains('instance-select')) {
-                instancesListPopup.innerHTML = ''
-                for (let instance of instancesList) {
-                    if (instance.whitelistActive) {
-                        instance.whitelist.map(whitelist => {
-                            if (whitelist == auth?.name) {
-                                if (instance.name == instanceSelect) {
-                                    instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements active-instance">${instance.name}</div>`
-                                } else {
-                                    instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements">${instance.name}</div>`
-                                }
-                            }
-                        })
-                    } else {
-                        if (instance.name == instanceSelect) {
-                            instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements active-instance">${instance.name}</div>`
-                        } else {
-                            instancesListPopup.innerHTML += `<div id="${instance.name}" class="instance-elements">${instance.name}</div>`
-                        }
-                    }
-                }
-
-                instancePopup.style.display = 'flex'
-            }
-
-            if (!e.target.classList.contains('instance-select')) this.startGame()
+        // 🔹 Botón PLAY
+        playBTN.addEventListener('click', async e => {
+            this.startGame()
         })
-
-        instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none')
     }
 
     async startGame() {
@@ -227,9 +231,7 @@ class Home {
             },
 
             verify: options.verify,
-
             ignored: [...options.ignored],
-
             javaPath: configClient.java_config.java_path,
 
             screen: {
@@ -311,7 +313,6 @@ class Home {
 
         launch.on('error', err => {
             let popupError = new popup()
-
             popupError.openPopup({
                 title: 'Error',
                 content: err.error,
@@ -340,4 +341,5 @@ class Home {
         return { year: year, month: allMonth[month - 1], day: day }
     }
 }
+
 export default Home;
