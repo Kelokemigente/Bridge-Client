@@ -295,7 +295,7 @@ class Home {
             };
             new logger('Minecraft', '#36b030');
             ipcRenderer.send('main-window-progress-load')
-            infoStarting.innerHTML = `Arrancando...`
+            infoStarting.innerHTML = `Jugando...`
             console.log(e);
         })
 
