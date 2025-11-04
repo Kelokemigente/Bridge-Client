@@ -9,7 +9,7 @@
         "email": "itzaearrieta090@gmail.com",   
         "url": "https://github.com/Kelokemigente"
     },  
-    "url": "http://51.222.11.99:25857/main",
+    "url": "http://172.96.172.240:25590/main",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
