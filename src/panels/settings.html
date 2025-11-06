@@ -1,88 +1,181 @@
-<div class="container">
-    <div class="nav-settings">
-        <p>Ajustes</p>
-        <div class="nav-box">
-            <div id="account" class="nav-settings-btn active-settings-BTN">CUENTAS</div>
-            <div id="java" class="nav-settings-btn">RAM</div>
-            <div id="resolution" class="nav-settings-btn">RESOLUCIÓN</div>
-            <div id="launcher" class="nav-settings-btn">LAUNCHER INFO</div>
-            <div id="save" class="nav-settings-btn">Cerrar</div>
+<div class="settings-container">
+    <!-- Header with title and tabs -->
+    <div class="settings-header">
+        <div class="settings-title">
+            <span class="settings-icon">⚙️</span>
+            <h1>Configuración</h1>
+        </div>
+        <div class="settings-tabs">
+            <div id="account" class="settings-tab active-tab">
+                <span class="tab-icon"></span>
+                <span class="tab-label">Cuentas</span>
+            </div>
+            <div id="java" class="settings-tab">
+                <span class="tab-icon"></span>
+                <span class="tab-label">RAM</span>
+            </div>
+            <div id="resolution" class="settings-tab">
+                <span class="tab-icon"></span>
+                <span class="tab-label">Resolución</span>
+            </div>
+            <div id="launcher" class="settings-tab">
+                <span class="tab-icon">ℹ️</span>
+                <span class="tab-label">Launcher</span>
+            </div>
+        </div>
+        <div class="settings-actions">
+            <button id="save" class="settings-close-btn">
+                <span>✕ Cerrar</span>
+            </button>
         </div>
     </div>
 
-    <div id="account-tab" class="container-settings active-container-settings">
-        <div class="titre-tab">Cuentas de Jugadores</div>
-
-        <div class="accounts-list content-scroll">
-            <div class="account" id="add">
-                <div class="add-profile">
-                    <div class="icon-account-add"></div>
-                </div>
-                <div class="add-text-profile">Añadir una cuenta</div>
+    <!-- Content area -->
+    <div class="settings-content">
+        <!-- Account tab -->
+        <div id="account-tab" class="settings-panel active-panel">
+            <div class="panel-header">
+                <h2>Cuentas de Jugadores</h2>
+                <p class="panel-subtitle">Gestiona tus cuentas de Minecraft</p>
             </div>
-        </div>
-    </div>
-
-    <div id="java-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Tu configuración de RAM</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Define la RAM asignada a tu juego, una cantidad mayor aumentará el rendimiento del mismo.
-                tu juego.<br>
-                Tenga en cuenta que debe evitar poner demasiado, de lo contrario puede causar pérdida de
-                rendimiento en sus otras aplicaciones.<br><br>
-                <b>-RAM Maximale:</b> Indica la cantidad total de RAM asignada a tu juego. Se recomienda no hacerlo
-                superar el 50% de la cantidad total de RAM presente en su PC.<br><br>
-                <b>-RAM Minimale:</b> Indica la cantidad mínima de RAM asignada cuando se inicia el juego. Es
-                Se recomienda no poner más de 4GB para este valor.
-            </div>
-            <div class="settings-elements content-evenly">
-                <div class="memory-slider" min="0.5" max="8" step="0.5">
-                    <div class="slider-touch-left">
-                        <span value="0 Go"></span>
+            <div class="settings-card">
+                <div class="accounts-list content-scroll">
+                    <div class="account" id="add">
+                        <div class="account-card add-account">
+                            <div class="add-profile-icon">
+                                <span>+</span>
+                            </div>
+                            <div class="add-text-profile">Añadir Cuenta</div>
+                        </div>
                     </div>
-                    <div class="slider-touch-right">
-                        <span value="0 Go"></span>
-                    </div>
-                    <div class="slider-line">
-                        <span></span>
-                    </div>
-                </div>
-                <div class="ram-info-block">
-                    <b>Tienes un total de <span id="total-ram">0 GB</span> RAM.</b><br>
-                    <b>Tienes un total de <span id="free-ram">0 GB</span> RAM disponibles.</b>
                 </div>
             </div>
         </div>
 
-        
-    </div>
-
-    <div id="resolution-tab" class="container-settings">
-        <div class="titre-tab">Configuración de resolución de Minecraft</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Establece una resolución personalizada para tener un juego adaptado a tu pantalla.
-                De forma predeterminada, el juego comienza en 854 X 480,<br>Puedes cambiar este valor para mayor comodidad en el juego.
-                óptimo. La resolución ideal es 1280 X 720.
+        <!-- RAM tab -->
+        <div id="java-tab" class="settings-panel content-scroll">
+            <div class="panel-header">
+                <h2>Configuración de RAM</h2>
+                <p class="panel-subtitle">Optimiza el rendimiento de tu juego</p>
             </div>
-            <div class="settings-elements content-center">
-                <div class="input-size-element">
-                    <input type="number" class="width-size input-resolution">
-                    <div class="size-cross"></div>
-                    <input type="number" class="height-size input-resolution">
+            <div class="settings-card">
+                <div class="card-content">
+                    <div class="setting-info">
+                        <p>Define la RAM asignada a tu juego. Una cantidad mayor aumentará el rendimiento del mismo.</p>
+                        <p class="info-highlight">⚠️ Se recomienda no superar el 50% de tu RAM total.</p>
+                    </div>
+                    <div class="settings-elements content-evenly">
+                        <div class="memory-slider-container">
+                            <div class="memory-slider" min="0.5" max="8" step="0.5">
+                                <div class="slider-touch-left">
+                                    <span value="0 Go"></span>
+                                </div>
+                                <div class="slider-touch-right">
+                                    <span value="0 Go"></span>
+                                </div>
+                                <div class="slider-line">
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ram-info-block">
+                            <div class="info-item">
+                                <span class="info-label">RAM Total:</span>
+                                <span class="info-value" id="total-ram">0 GB</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">RAM Disponible:</span>
+                                <span class="info-value" id="free-ram">0 GB</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="size-reset size-btn">Por defecto</div>
+            </div>
+        </div>
+
+        <!-- Resolution tab -->
+        <div id="resolution-tab" class="settings-panel">
+            <div class="panel-header">
+                <h2>Resolución de Pantalla</h2>
+                <p class="panel-subtitle">Personaliza la resolución de tu juego</p>
+            </div>
+            <div class="settings-card">
+                <div class="card-content">
+                    <div class="setting-info">
+                        <p>Establece una resolución personalizada para tu pantalla. La resolución ideal es <strong>1280 x 720</strong>.</p>
+                    </div>
+                    <div class="settings-elements content-center">
+                        <div class="resolution-input-group">
+                            <div class="input-group-item">
+                                <label>Ancho</label>
+                                <input type="number" class="width-size input-resolution" placeholder="1920">
+                            </div>
+                            <div class="resolution-separator">×</div>
+                            <div class="input-group-item">
+                                <label>Alto</label>
+                                <input type="number" class="height-size input-resolution" placeholder="1080">
+                            </div>
+                            <button class="size-reset btn-secondary">Restaurar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Launcher tab -->
+        <div id="launcher-tab" class="settings-panel content-scroll">
+            <div class="panel-header">
+                <h2>Información del Launcher</h2>
+                <p class="panel-subtitle">Configuración y detalles del launcher</p>
+            </div>
+            
+            <!-- About card -->
+            <div class="settings-card">
+                <div class="card-title">Acerca de Bridge Client</div>
+                <div class="card-content">
+                    <p class="launcher-info">
+                        Este launcher fue creado por <strong>@ImD4rken</strong>, Owner de Bridge Studio. 
+                        Está hecho para jugar muchos eventos tanto para usuarios premium como no premium.
+                        Le damos las gracias al equipo y a la comunidad por formar parte de este proyecto.
+                    </p>
+                </div>
+            </div>
+
+
+
+            <!-- Close behavior card -->
+            <div class="settings-card">
+                <div class="card-title">Comportamiento al Cerrar</div>
+                <div class="card-content">
+                    <div class="close-box close-selector">
+                        <button class="close-btn close-launcher" title="Cerrar solo el launcher">
+                            <span>Cerrar Launcher</span>
+                        </button>
+                        <button class="close-btn close-all" title="Cerrar todo">
+                            <span>Cerrar Todo</span>
+                        </button>
+                        <button class="close-btn close-none" title="No cerrar nada">
+                            <span>No Cerrar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Java Path card -->
+            <div class="settings-card">
+                <div class="card-title">Ruta de Java</div>
+                <div class="card-content">
+                    <div class="java-path-info">
+                        <p class="java-path-txt"></p>
+                    </div>
+                    <div class="java-path-box">
+                        <input type="text" class="java-path-input-text" readonly>
+                        <input type="file" class="java-path-input-file">
+                        <button class="java-path-set btn-secondary">Seleccionar</button>
+                        <button class="java-path-reset btn-secondary">Restaurar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div id="launcher-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Información del launcher</div>
-        <div class="settings-elements-box">
-            <div class="setting-text">
-                Este launcher fue creado por @ImD4rken, Owner de Bridge Productions, este launcher está hecho para jugar
-                muchos eventos tanto para premiums como no premiums, debo darle las gracias tanto al staff como
-                a las personas que forman parte de esta comunidad ya que queremos crecer como studio y llegar a ser
-                grandes, en fúturo sacaremos muchos eventos para que los disfruten y de nuevo muchas gracias por 
-                descargar nuestro launcher y por formar parte de Bridge Productions.<br><br>
+</div>

@@ -10,8 +10,10 @@ class Login {
         this.config = config;
         this.db = new database();
 
-        document.querySelector('.login-select').style.display = 'block';
+        // Mostrar panel de selección inicial
+        this.showTab('.login-select');
 
+        // Eventos de selección de login
         document.querySelector('.select-microsoft').addEventListener('click', () => {
             this.showMicrosoftLogin();
         });
@@ -20,32 +22,64 @@ class Login {
             this.showOfflineLogin();
         });
 
+        // Cancelar Microsoft
         document.querySelector('.cancel-home').addEventListener('click', () => {
-            document.querySelector('.cancel-home').style.display = 'none';
-            changePanel('settings');
+            this.showTab('.login-select');
         });
+
+        // Cancelar Offline
+        document.querySelector('.cancel-offline').addEventListener('click', () => {
+            this.showTab('.login-select');
+        });
+
+        // Cancelar AZauth
+        const cancelAZauth = document.querySelector('.cancel-AZauth');
+        if(cancelAZauth){
+            cancelAZauth.addEventListener('click', () => {
+                this.showTab('.login-select');
+            });
+        }
+
+        // Cancelar AZauth-A2F
+        const cancelAZauthA2F = document.querySelector('.cancel-AZauth-A2F');
+        if(cancelAZauthA2F){
+            cancelAZauthA2F.addEventListener('click', () => {
+                this.showTab('.login-select');
+            });
+        }
     }
 
-    // Mostrar login de Microsoft
+    // Mostrar una pestaña y ocultar las demás
+    showTab(selector) {
+        document.querySelectorAll('.login-tabs').forEach(tab => {
+            tab.style.display = 'none';
+        });
+        const tab = document.querySelector(selector);
+        if(tab) tab.style.display = 'block';
+    }
+
+    // Mostrar login Microsoft
     showMicrosoftLogin() {
-        document.querySelector('.login-select').style.display = 'none';
+        this.showTab('.login-home');
         this.getMicrosoft();
     }
 
-    // Mostrar login de Nick offline
+    // Mostrar login Offline
     showOfflineLogin() {
-        document.querySelector('.login-select').style.display = 'none';
+        this.showTab('.login-offline');
         this.getCrack();
     }
 
     async getMicrosoft() {
         console.log('Initializing Microsoft login...');
-        let popupLogin = new popup();
-        let loginHome = document.querySelector('.login-home');
-        let microsoftBtn = document.querySelector('.connect-home');
-        loginHome.style.display = 'block';
+        const popupLogin = new popup();
+        const microsoftBtn = document.querySelector('.connect-home');
 
-        microsoftBtn.addEventListener("click", () => {
+        // Evitar duplicar listener
+        microsoftBtn.replaceWith(microsoftBtn.cloneNode(true));
+        const btn = document.querySelector('.connect-home');
+
+        btn.addEventListener("click", () => {
             popupLogin.openPopup({
                 title: 'Conectando',
                 content: 'Espere por favor...',
@@ -53,14 +87,12 @@ class Login {
             });
 
             ipcRenderer.invoke('Microsoft-window', this.config.client_id).then(async account_connect => {
-                if (account_connect == 'cancel' || !account_connect) {
+                if (!account_connect || account_connect === 'cancel') {
                     popupLogin.closePopup();
                     return;
-                } else {
-                    await this.saveData(account_connect);
-                    popupLogin.closePopup();
                 }
-
+                await this.saveData(account_connect);
+                popupLogin.closePopup();
             }).catch(err => {
                 popupLogin.openPopup({
                     title: 'Error',
@@ -73,15 +105,17 @@ class Login {
 
     async getCrack() {
         console.log('Initializing offline login...');
-        let popupLogin = new popup();
-        let loginOffline = document.querySelector('.login-offline');
+        const popupLogin = new popup();
+        const emailOffline = document.querySelector('.email-offline');
+        const connectOffline = document.querySelector('.connect-offline');
 
-        let emailOffline = document.querySelector('.email-offline');
-        let connectOffline = document.querySelector('.connect-offline');
-        loginOffline.style.display = 'block';
+        // Evitar duplicar listener
+        connectOffline.replaceWith(connectOffline.cloneNode(true));
+        const btn = document.querySelector('.connect-offline');
 
-        connectOffline.addEventListener('click', async () => {
-            if (emailOffline.value.length < 3) {
+        btn.addEventListener('click', async () => {
+            const nick = emailOffline.value.trim();
+            if (nick.length < 3) {
                 popupLogin.openPopup({
                     title: 'Error',
                     content: 'Tu Nick debe tener al menos 3 caracteres.',
@@ -89,8 +123,7 @@ class Login {
                 });
                 return;
             }
-
-            if (emailOffline.value.match(/ /g)) {
+            if (nick.includes(' ')) {
                 popupLogin.openPopup({
                     title: 'Error',
                     content: 'Tu Nick no debe contener espacios.',
@@ -99,8 +132,7 @@ class Login {
                 return;
             }
 
-            let MojangConnect = await Mojang.login(emailOffline.value);
-
+            const MojangConnect = await Mojang.login(nick);
             if (MojangConnect.error) {
                 popupLogin.openPopup({
                     title: 'Error',
@@ -115,33 +147,59 @@ class Login {
     }
 
     async getAZauth() {
-        // Tu función AZauth sigue igual, sin cambios
+        // Aquí tu lógica AZauth como estaba antes
     }
 
     async saveData(connectionData) {
-        let configClient = await this.db.readData('configClient');
-        let account = await this.db.createData('accounts', connectionData);
-        let instanceSelect = configClient.instance_selct;
-        let instancesList = await config.getInstanceList();
+        const configClient = await this.db.readData('configClient');
+        const account = await this.db.createData('accounts', connectionData);
+        const instanceSelect = configClient.instance_selct;
+        const instancesList = await config.getInstanceList();
+
+        // Select the newly created account
         configClient.account_selected = account.ID;
 
-        for (let instance of instancesList) {
-            if (instance.whitelistActive) {
-                let whitelist = instance.whitelist.find(whitelist => whitelist == account.name);
-                if (whitelist !== account.name) {
-                    if (instance.name == instanceSelect) {
-                        let newInstanceSelect = instancesList.find(i => i.whitelistActive == false);
-                        configClient.instance_selct = newInstanceSelect.name;
-                        await setStatus(newInstanceSelect.status);
+        // Ensure instance selection respects whitelist after adding account
+        try {
+            for (let instance of instancesList) {
+                if (instance.whitelistActive) {
+                    const whitelist = instance.whitelist.find(u => u === account.name);
+                    if (whitelist !== account.name && instance.name === instanceSelect) {
+                        const newInstanceSelect = instancesList.find(i => !i.whitelistActive);
+                        if (newInstanceSelect) {
+                            configClient.instance_selct = newInstanceSelect.name;
+                            await setStatus(newInstanceSelect.status);
+                        }
                     }
                 }
             }
+        } catch (err) {
+            console.warn('Error while adjusting instance selection for new account:', err);
         }
 
+        // Persist config changes
         await this.db.updateData('configClient', configClient);
-        await addAccount(account);
-        await accountSelect(account);
-        changePanel('home');
+
+        // Update UI; be defensive: if addAccount/accountSelect fail, still attempt to go Home
+        try {
+            await addAccount(account);
+        } catch (err) {
+            console.warn('addAccount failed (UI list update) but account was created:', err);
+        }
+
+        try {
+            await accountSelect(account);
+        } catch (err) {
+            console.warn('accountSelect failed (UI selection) but account was created:', err);
+        }
+
+        try {
+            changePanel('home');
+        } catch (err) {
+            console.error('changePanel to home failed after login:', err);
+        }
+
+        return account;
     }
 }
 

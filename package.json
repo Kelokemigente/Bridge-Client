@@ -1,15 +1,15 @@
 {
     "name": "Bridge-Client",
     "preductname": "Bridge Client",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Cliente Oficial de Bridge Studio",
     "main": "src/app.js",
     "author": {
         "name": "Darken",
-        "email": "itzaearrieta090@gmail.com",   
+        "email": "itzaearrieta090@gmail.com",
         "url": "https://github.com/Kelokemigente"
-    },  
-    "url": "http://172.96.172.240:25590/main",
+    },
+    "url": "http://172.96.172.240:1200/main",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
@@ -22,10 +22,13 @@
         "ignore": "**/test"
     },
     "dependencies": {
+        "discord-rpc": "^4.0.1",
+        "discord.js": "^14.24.2",
         "electron-updater": "^6.1.8",
         "minecraft-java-core": "^4.1.1",
         "node-bdd": "^2.0.4",
         "node-fetch": "^2.7.0",
+        "start": "^5.1.0",
         "xml-js": "^1.6.11"
     },
     "devDependencies": {

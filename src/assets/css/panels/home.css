@@ -361,6 +361,8 @@
     background: var(--background);
     border-radius: 10px;
     padding: 1rem 3rem;
+    width: min(1000px, 92%);
+    max-width: 1100px;
 }
 
 .close-popup {
@@ -413,37 +415,59 @@
     pointer-events: auto;
 }
 
-.social-list {
+.instance-avatars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 8px;
     border-radius: 10px;
     height: 100%;
 }
 
-.social-block {
-    display: flex;
-    background: transparent;
-    width: 90px;
-    height: 90px;
-    margin-bottom: 1rem;
-    border-radius: 10px;
-    font-size: 2rem;
+.instance-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--background-element);
+    background-position: center;
+    background-size: cover;
+    border: 3px solid rgba(255,255,255,0.06);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    gap: 40%;
+    display: inline-block;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.social-block:hover {
-    transform: scale(1.2);
-    transition: transform 0.3s ease-in-out;
+.instance-avatar:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
 }
 
-.social-block .icon-social {
-    pointer-events: none;
-    background-repeat: no-repeat;
-    height: 55%;
-    width: 55%;
-    color: white;
+.instance-avatar.active {
+    border-color: var(--element-color);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45), 0 0 8px rgba(0,0,0,0.15) inset;
 }
+
+.instance-avatar.locked {
+    filter: grayscale(80%);
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.instance-avatar.locked::after {
+    content: '\f023'; /* font icon lock (fallback) */
+    position: absolute;
+    font-family: 'FontAwesome', sans-serif;
+    font-size: 18px;
+    color: rgba(255,255,255,0.9);
+    right: 4px;
+    bottom: 4px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+.instance-avatar { position: relative; }
 
 .no-instances {
     font-size: 1.2rem;
@@ -451,3 +475,173 @@
     padding: 1rem;
     text-align: center;
 }
+
+/* Tooltip for instance avatars in the sidebar */
+.instance-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    pointer-events: none; /* so it doesn't block hover/click */
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    transition: opacity 0.12s ease;
+}
+
+/* Modal de códigos */
+.code-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.code-modal-content {
+    background: var(--background);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.code-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--shadow);
+}
+
+.code-modal-header h2 {
+    margin: 0;
+    color: var(--color);
+    font-size: 1.3rem;
+}
+
+.code-modal-close {
+    background: none;
+    border: none;
+    color: var(--color);
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+}
+
+.code-modal-close:hover {
+    transform: scale(1.2);
+}
+
+.code-modal-body {
+    padding: 1.5rem;
+}
+
+.code-modal-body p {
+    color: var(--color);
+    margin: 0 0 1.5rem 0;
+    font-size: 1rem;
+}
+
+.code-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--shadow);
+    border-radius: 6px;
+    background: var(--background-element);
+    color: var(--color);
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s ease;
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: var(--element-color);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.code-modal-buttons {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.code-modal-submit,
+.code-modal-cancel {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.code-modal-submit {
+    background: var(--element-color);
+    color: white;
+}
+
+.code-modal-submit:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.code-modal-cancel {
+    background: var(--background-element);
+    color: var(--color);
+    border: 1px solid var(--shadow);
+}
+
+.code-modal-cancel:hover {
+    background: var(--shadow);
+}
+
+/* Instancias bloqueadas por código */
+.locked-code-card {
+    opacity: 0.7;
+    position: relative;
+}
+
+.locked-code-card .instance-banner-overlay {
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.instance-lock-icon {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+}
+
+.instance-avatar.locked-by-code::after {
+    content: '🔒';
+    position: absolute;
+    font-size: 20px;
+    right: 4px;
+    bottom: 4px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+
