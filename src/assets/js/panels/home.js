@@ -270,6 +270,9 @@ class Home {
 
         // Botón selector de instancia abre popup
         instanceBTN.addEventListener('click', async () => {
+            // Guardar el fondo actual ANTES de abrir el popup (para restaurarlo después)
+            const previousBackground = this.currentBackground;
+            
             instancesListPopup.innerHTML = '';
 
             if (instancesList.length === 0) {
@@ -303,10 +306,8 @@ class Home {
             const onLeave = e => {
                 const related = e.relatedTarget;
                 if (!instancesListPopup.contains(related)) {
-                    try {
-                        const currentInstance = instancesList.find(i => i.name === instanceSelect);
-                        this.setBackground(currentInstance?.backgroundUrl || currentInstance?.background || null);
-                    } catch (err) { }
+                    // Restaurar el fondo guardado ANTES de abrir el popup
+                    this.setBackground(previousBackground || null);
                 }
             };
 

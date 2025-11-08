@@ -151,8 +151,24 @@ class Login {
     }
 
     async saveData(connectionData) {
+        // Normalizar el objeto de conexión para asegurar que tiene la propiedad 'name'
+        if (!connectionData.name && connectionData.profile?.name) {
+            connectionData.name = connectionData.profile.name;
+            console.log(`[Login] Microsoft account normalized: name=${connectionData.name}`);
+        }
+        if (!connectionData.name) {
+            console.warn('[Login] Account has no name property!', connectionData);
+        }
+
         const configClient = await this.db.readData('configClient');
         const account = await this.db.createData('accounts', connectionData);
+        
+        // Verificar que createData preservó la propiedad 'name'
+        if (!account.name && account.profile?.name) {
+            account.name = account.profile.name;
+            console.log(`[Login] Account name needed re-normalization after createData: ${account.name}`);
+            await this.db.updateData('accounts', account, account.ID);
+        }
         const instanceSelect = configClient.instance_selct;
         const instancesList = await config.getInstanceList();
 

@@ -70,15 +70,11 @@ class Launcher {
             ipcRenderer.send('main-window-minimize');
         });
 
-        let maximized = false;
         let maximize = document.querySelector(`.${platform} .frame #maximize`);
-        maximize.addEventListener('click', () => {
-            if (maximized) ipcRenderer.send('main-window-maximize')
-            else ipcRenderer.send('main-window-maximize');
-            maximized = !maximized
-            maximize.classList.toggle('icon-maximize')
-            maximize.classList.toggle('icon-restore-down')
-        });
+        // Deshabilitar el botón de maximizar - ventana tamaño fijo
+        if (maximize) {
+            maximize.style.display = 'none';
+        }
 
         document.querySelector(`.${platform} .frame #close`).addEventListener('click', () => {
             ipcRenderer.send('main-window-close');
@@ -162,6 +158,22 @@ class Launcher {
                         continue;
                     }
 
+                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
+                    if (!refresh_accounts.name && refresh_accounts.profile?.name) {
+                        refresh_accounts.name = refresh_accounts.profile.name;
+                        console.log(`[Launcher] Microsoft account refreshed and normalized: name=${refresh_accounts.name}`);
+                    }
+                    
+                    if (!refresh_accounts.name) {
+                        console.error(`[Account] ${account.name}: Refreshed account missing name property`, refresh_accounts);
+                        await this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            await this.db.updateData('configClient', configClient)
+                        }
+                        continue;
+                    }
+
                     refresh_accounts.ID = account_ID
                     await this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
@@ -177,17 +189,33 @@ class Launcher {
                     let refresh_accounts = await new AZauth(this.config.online).verify(account);
 
                     if (refresh_accounts.error) {
-                        this.db.deleteData('accounts', account_ID)
+                        await this.db.deleteData('accounts', account_ID)
                         if (account_ID == account_selected) {
                             configClient.account_selected = null
-                            this.db.updateData('configClient', configClient)
+                            await this.db.updateData('configClient', configClient)
                         }
                         console.error(`[Account] ${account.name}: ${refresh_accounts.message}`);
                         continue;
                     }
 
+                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
+                    if (!refresh_accounts.name && refresh_accounts.profile?.name) {
+                        refresh_accounts.name = refresh_accounts.profile.name;
+                        console.log(`[Launcher] AZauth account refreshed and normalized: name=${refresh_accounts.name}`);
+                    }
+                    
+                    if (!refresh_accounts.name) {
+                        console.error(`[Account] ${account.name}: Refreshed account missing name property`, refresh_accounts);
+                        await this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            await this.db.updateData('configClient', configClient)
+                        }
+                        continue;
+                    }
+
                     refresh_accounts.ID = account_ID
-                    this.db.updateData('accounts', refresh_accounts, account_ID)
+                    await this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else if (account.meta.type == 'Mojang') {
@@ -200,10 +228,15 @@ class Launcher {
                     });
                     if (account.meta.online == false) {
                         let refresh_accounts = await Mojang.login(account.name);
+                        
+                        // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
+                        if (!refresh_accounts.name && refresh_accounts.profile?.name) {
+                            refresh_accounts.name = refresh_accounts.profile.name;
+                        }
 
                         refresh_accounts.ID = account_ID
                         await addAccount(refresh_accounts)
-                        this.db.updateData('accounts', refresh_accounts, account_ID)
+                        await this.db.updateData('accounts', refresh_accounts, account_ID)
                         if (account_ID == account_selected) accountSelect(refresh_accounts)
                         continue;
                     }
@@ -211,17 +244,33 @@ class Launcher {
                     let refresh_accounts = await Mojang.refresh(account);
 
                     if (refresh_accounts.error) {
-                        this.db.deleteData('accounts', account_ID)
+                        await this.db.deleteData('accounts', account_ID)
                         if (account_ID == account_selected) {
                             configClient.account_selected = null
-                            this.db.updateData('configClient', configClient)
+                            await this.db.updateData('configClient', configClient)
                         }
                         console.error(`[Account] ${account.name}: ${refresh_accounts.errorMessage}`);
                         continue;
                     }
 
+                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
+                    if (!refresh_accounts.name && refresh_accounts.profile?.name) {
+                        refresh_accounts.name = refresh_accounts.profile.name;
+                        console.log(`[Launcher] Mojang account refreshed and normalized: name=${refresh_accounts.name}`);
+                    }
+                    
+                    if (!refresh_accounts.name) {
+                        console.error(`[Account] ${account.name}: Refreshed account missing name property`, refresh_accounts);
+                        await this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            await this.db.updateData('configClient', configClient)
+                        }
+                        continue;
+                    }
+
                     refresh_accounts.ID = account_ID
-                    this.db.updateData('accounts', refresh_accounts, account_ID)
+                    await this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else {
