@@ -644,4 +644,79 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
+/* Código unlock section */
+.code-unlock-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--shadow);
+}
+
+.code-unlock-divider {
+    height: 1px;
+    background: var(--shadow);
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.code-unlock-label {
+    font-size: 1rem;
+    color: var(--color);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.code-unlock-input-container {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.code-unlock-input {
+    padding: 0.7rem 1rem;
+    border: 2px solid var(--element-color);
+    background: var(--background-element);
+    color: var(--color);
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 250px;
+    transition: all 0.3s ease;
+}
+
+.code-unlock-input:focus {
+    outline: none;
+    border-color: var(--color);
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+}
+
+.code-unlock-button {
+    padding: 0.7rem 2rem;
+    background: var(--element-color);
+    color: var(--background);
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.code-unlock-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--element-color);
+}
+
+.code-unlock-button:active {
+    transform: scale(0.95);
+}
+
+.code-unlock-message {
+    text-align: center;
+    font-size: 0.9rem;
+    min-height: 1.5rem;
+    margin-top: 0.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
 

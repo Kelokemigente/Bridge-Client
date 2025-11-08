@@ -19,16 +19,83 @@ class Home {
         document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'));
     }
 
-    // Método auxiliar para filtrar instancias autorizadas por whitelist
-    filterAuthorizedInstances(instancesList, authName) {
-        return instancesList.filter(instance => {
+    // Método auxiliar para filtrar instancias autorizadas por whitelist y contraseña
+    async filterAuthorizedInstances(instancesList, authName) {
+        // Obtener instancias desbloqueadas de la BD
+        let unlockedData = {};
+        try {
+            unlockedData = await this.db.readData('unlockedInstances') || {};
+            console.log('filterAuthorizedInstances: unlockedData from DB =', JSON.stringify(unlockedData));
+        } catch (e) {
+            console.warn('Error reading unlocked instances from DB:', e);
+        }
+
+        // Validar que los códigos de instancias desbloqueadas sigan siendo iguales
+        // Si el código cambió en el servidor, limpiar ese desbloqueo
+        let needsUpdate = false;
+        for (let instanceName in unlockedData) {
+            const unlockedInfo = unlockedData[instanceName];
+            // Soportar formato antiguo (true/false) y nuevo (objeto con código)
+            const savedCode = typeof unlockedInfo === 'object' ? unlockedInfo.code : null;
+            
+            const currentInstance = instancesList.find(i => i.name === instanceName);
+            if (currentInstance && currentInstance.password) {
+                // Si no hay código guardado, o si cambió, limpiar el desbloqueo
+                if (!savedCode || savedCode !== currentInstance.password) {
+                    const reason = !savedCode ? 'no code stored' : 'code mismatch';
+                    console.log(`🔄 ${reason} for "${instanceName}" - clearing unlock`);
+                    delete unlockedData[instanceName];
+                    needsUpdate = true;
+                }
+            } else {
+                // Si la instancia ya no existe o no tiene contraseña, limpiar
+                if (currentInstance && !currentInstance.password) {
+                    console.log(`🔄 Password removed from "${instanceName}" - clearing unlock`);
+                    delete unlockedData[instanceName];
+                    needsUpdate = true;
+                }
+            }
+        }
+
+        // Guardar cambios si hubo limpieza
+        if (needsUpdate) {
+            try {
+                // Remover el campo ID antes de guardar (es metadata de la BD, no del contenido)
+                const dataToSave = { ...unlockedData };
+                delete dataToSave.ID;
+                await this.db.updateData('unlockedInstances', dataToSave);
+                console.log('✅ Cleaned up expired unlocks');
+            } catch (e) {
+                console.warn('Error updating unlocks:', e);
+            }
+        }
+
+        // Filtrar instancias desbloqueadas
+        const unlockedInstances = Object.keys(unlockedData).filter(key => {
+            const info = unlockedData[key];
+            return info === true || (typeof info === 'object' && info !== null);
+        });
+
+        const filtered = instancesList.filter(instance => {
+            // Si la instancia tiene contraseña, solo mostrar si está desbloqueada
+            if (instance.password) {
+                const isUnlocked = unlockedInstances.includes(instance.name);
+                console.log(`Instance "${instance.name}" has password, unlocked=${isUnlocked}`);
+                return isUnlocked;
+            }
+
+            // Si tiene whitelist, validar
             if (instance.whitelistActive) {
                 const wl = Array.isArray(instance.whitelist) ? instance.whitelist : [];
                 return wl.includes(authName);
             }
-            // Si no tiene whitelist, siempre está disponible
+
+            // Si no tiene restricciones, siempre está disponible
             return true;
         });
+        
+        console.log('filterAuthorizedInstances: total instances in =', instancesList.length, 'filtered out =', filtered.length);
+        return filtered;
     }
 
     // Establece el fondo del launcher, con precarga y fallback
@@ -61,6 +128,11 @@ class Home {
 
     async news() {
         let newsElement = document.querySelector('.news-list');
+        if (!newsElement) {
+            console.warn('news-list element not found in DOM');
+            return;
+        }
+        
         let news = await config.getNews().then(res => res).catch(err => false);
 
         if (news) {
@@ -146,7 +218,7 @@ class Home {
             let auth = await this.db.readData('accounts', configClient.account_selected);
             let allInstances = await config.getInstanceList();
             // Filtrar solo instancias autorizadas
-            let instancesList = this.filterAuthorizedInstances(allInstances, auth?.name);
+            let instancesList = await this.filterAuthorizedInstances(allInstances, auth?.name);
             const container = document.querySelector('.instance-avatars');
             if (!container) return;
 
@@ -233,7 +305,7 @@ class Home {
         let auth = await this.db.readData('accounts', configClient.account_selected);
         let allInstances = await config.getInstanceList();
         // Filtrar solo instancias autorizadas
-        let instancesList = this.filterAuthorizedInstances(allInstances, auth?.name);
+        let instancesList = await this.filterAuthorizedInstances(allInstances, auth?.name);
         
         let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct)
             ? configClient?.instance_selct
@@ -351,6 +423,97 @@ class Home {
 
         // Cerrar popup
         instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none');
+
+        // Lógica de desbloqueo con código
+        const codeInput = document.querySelector('.code-unlock-input');
+        const unlockButton = document.querySelector('.code-unlock-button');
+        const messageDiv = document.querySelector('.code-unlock-message');
+
+        if (unlockButton) {
+            unlockButton.addEventListener('click', async () => {
+                const code = codeInput.value.trim();
+                if (!code) {
+                    messageDiv.textContent = 'Please enter a code';
+                    messageDiv.style.color = 'red';
+                    return;
+                }
+
+                // Buscar instancia con ese código en TODAS las instancias (incluyendo las ocultas)
+                const matchedInstance = allInstances.find(inst => inst.password && inst.password === code);
+
+                if (!matchedInstance) {
+                    messageDiv.textContent = 'Invalid code';
+                    messageDiv.style.color = 'red';
+                    codeInput.value = '';
+                    return;
+                }
+
+                // Guardar en BD que esta instancia está desbloqueada
+                try {
+                    console.log(`🔓 Starting unlock process for: ${matchedInstance.name}`);
+                    let unlockedData = await this.db.readData('unlockedInstances') || {};
+                    console.log(`📊 Current unlockedInstances from DB: ${JSON.stringify(unlockedData)}`);
+                    
+                    // Guardar con el código para validar cambios futuros
+                    unlockedData[matchedInstance.name] = {
+                        code: matchedInstance.password,
+                        unlockedAt: new Date().toISOString()
+                    };
+                    console.log(`📝 Updated unlockedInstances to save: ${JSON.stringify(unlockedData)}`);
+                    
+                    // Remover el campo ID antes de guardar (es metadata de la BD, no del contenido)
+                    const dataToSave = { ...unlockedData };
+                    delete dataToSave.ID;
+                    
+                    // Si el registro no existe, créalo; si existe, actualízalo
+                    let readCheck = await this.db.readData('unlockedInstances');
+                    if (!readCheck) {
+                        await this.db.createData('unlockedInstances', dataToSave);
+                        console.log(`✅ Created new record in DB`);
+                    } else {
+                        await this.db.updateData('unlockedInstances', dataToSave);
+                        console.log(`✅ Updated existing record in DB`);
+                    }
+
+                    messageDiv.textContent = `✓ ${matchedInstance.name} desbloqueada exitosamente! Cargando...`;
+                    messageDiv.style.color = 'green';
+                    codeInput.value = '';
+                    console.log(`🎉 Instance unlocked: ${matchedInstance.name}`);
+
+                    instancePopup.style.display = 'none';
+                    setTimeout(async () => {
+                        try {
+                            await this.renderSidebarAvatars();
+                            console.log(`👥 renderSidebarAvatars completed`);
+                            await this.instancesSelect();
+                            console.log(`📋 instancesSelect completed`);
+                            // Reabre el popup automáticamente para mostrar la instancia desbloqueada
+                            setTimeout(() => {
+                                instancePopup.style.display = 'flex';
+                                console.log(`📂 Popup reopened`);
+                            }, 300);
+                        } catch (reloadErr) {
+                            console.error(`❌ Error during reload: ${reloadErr.message}`);
+                            console.error(`Stack: ${reloadErr.stack}`);
+                            messageDiv.textContent = 'Error reloading instances: ' + reloadErr.message;
+                            messageDiv.style.color = 'red';
+                        }
+                    }, 600);
+                } catch (e) {
+                    console.error(`❌ Error unlocking instance: ${e.message}`);
+                    console.error(`📍 Stack: ${e.stack}`);
+                    messageDiv.textContent = 'Error unlocking instance: ' + e.message;
+                    messageDiv.style.color = 'red';
+                }
+            });
+
+            // También permitir Enter para enviar
+            if (codeInput) {
+                codeInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') unlockButton.click();
+                });
+            }
+        }
 
         // Botón Jugar
         playBTN.addEventListener('click', () => this.startGame());
