@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="3.3.6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows-arm64.jar!/" />
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows-x86.jar!/" />
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/org/lwjgl/lwjgl-glfw/3.3.1/lwjgl-glfw-3.3.1-natives-windows.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

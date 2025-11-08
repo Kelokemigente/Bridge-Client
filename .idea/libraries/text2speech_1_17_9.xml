@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="text2speech-1.17.9">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/com/mojang/text2speech/1.17.9/text2speech-1.17.9.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

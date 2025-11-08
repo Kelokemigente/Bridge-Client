@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="patchy-2.2.10">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/.Bridge-Client/libraries/com/mojang/patchy/2.2.10/patchy-2.2.10.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

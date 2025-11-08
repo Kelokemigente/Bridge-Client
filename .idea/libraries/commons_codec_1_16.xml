@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="commons-codec-1.16">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/.LunarisClient/libraries/commons-codec/commons-codec/1.15/commons-codec-1.15.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

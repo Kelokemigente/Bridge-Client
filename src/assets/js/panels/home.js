@@ -14,10 +14,21 @@ class Home {
         this.config = config;
         this.db = new database();
         this.news();
-        // Render instance avatars in the sidebar (replaces social icons)
         this.renderSidebarAvatars();
         this.instancesSelect();
         document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'));
+    }
+
+    // Método auxiliar para filtrar instancias autorizadas por whitelist
+    filterAuthorizedInstances(instancesList, authName) {
+        return instancesList.filter(instance => {
+            if (instance.whitelistActive) {
+                const wl = Array.isArray(instance.whitelist) ? instance.whitelist : [];
+                return wl.includes(authName);
+            }
+            // Si no tiene whitelist, siempre está disponible
+            return true;
+        });
     }
 
     // Establece el fondo del launcher, con precarga y fallback
@@ -133,12 +144,14 @@ class Home {
         try {
             let configClient = await this.db.readData('configClient');
             let auth = await this.db.readData('accounts', configClient.account_selected);
-            let instancesList = await config.getInstanceList();
+            let allInstances = await config.getInstanceList();
+            // Filtrar solo instancias autorizadas
+            let instancesList = this.filterAuthorizedInstances(allInstances, auth?.name);
             const container = document.querySelector('.instance-avatars');
             if (!container) return;
 
             // Debug: log instances returned from server and current auth
-            console.debug('renderSidebarAvatars: auth=', auth?.name, 'instancesList=', instancesList);
+            console.debug('renderSidebarAvatars: auth=', auth?.name, 'authorized instances=', instancesList.map(i => i.name));
 
             container.innerHTML = '';
 
@@ -153,20 +166,12 @@ class Home {
 
             const defaultAvatar = 'assets/images/icon.png';
             for (let instance of instancesList) {
+
                 const bg = instance.backgroundUrl || instance.background || '';
                 const avatar = instance.avatarUrl || instance.iconUrl || instance.icon || '';
                 const el = document.createElement('div');
                 el.className = 'instance-avatar';
                 el.dataset.name = instance.name;
-
-                // Determine if this instance is available for the current user
-                let locked = false;
-                
-                // Verificar si está bloqueada por whitelist
-                if (instance.whitelistActive) {
-                    const wl = Array.isArray(instance.whitelist) ? instance.whitelist : [];
-                    locked = !wl.includes(auth?.name);
-                }
 
                 // set avatar image (prefer avatar field; fallback to background or a default icon)
                 if (avatar) el.style.backgroundImage = `url('${avatar}')`;
@@ -174,17 +179,11 @@ class Home {
                 else el.style.backgroundImage = `url('${defaultAvatar}')`;
 
                 if (configClient.instance_selct === instance.name) el.classList.add('active');
-                if (locked) {
-                    el.classList.add('locked');
-                }
 
                 // Show tooltip on hover with the instance name
                 el.addEventListener('mouseenter', (ev) => {
                     try {
                         let tooltipText = instance.name;
-                        if (locked) {
-                            tooltipText += ' (Bloqueado)';
-                        }
                         tooltip.textContent = tooltipText;
                         tooltip.style.display = 'block';
                         // position tooltip to the right of avatar by default
@@ -204,14 +203,6 @@ class Home {
 
                 el.addEventListener('click', async () => {
                     try {
-                        if (locked) {
-                            // feedback for whitelist locked instance
-                            console.warn(`Instancia ${instance.name} bloqueada para el usuario ${auth?.name}`);
-                            let popupMsg = new popup();
-                            popupMsg.openPopup({ title: 'Acceso denegado', content: `No tienes acceso a la instancia ${instance.name}.`, color: 'orange' });
-                            return;
-                        }
-
                         // update visual selection
                         const prev = container.querySelector('.instance-avatar.active');
                         if (prev) prev.classList.remove('active');
@@ -240,7 +231,10 @@ class Home {
     async instancesSelect() {
         let configClient = await this.db.readData('configClient');
         let auth = await this.db.readData('accounts', configClient.account_selected);
-        let instancesList = await config.getInstanceList();
+        let allInstances = await config.getInstanceList();
+        // Filtrar solo instancias autorizadas
+        let instancesList = this.filterAuthorizedInstances(allInstances, auth?.name);
+        
         let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct)
             ? configClient?.instance_selct
             : null;
@@ -254,24 +248,18 @@ class Home {
         // Siempre mostrar el botón de instancias
         instanceBTN.style.display = 'flex';
 
-        if (!instanceSelect) {
-            let newInstanceSelect = instancesList.find(i => !i.whitelistActive) || instancesList[0];
-            configClient.instance_selct = newInstanceSelect?.name;
-            instanceSelect = newInstanceSelect?.name;
+        if (!instanceSelect && instancesList.length > 0) {
+            configClient.instance_selct = instancesList[0]?.name;
+            instanceSelect = instancesList[0]?.name;
             await this.db.updateData('configClient', configClient);
         }
 
+        // Aplicar status de la instancia seleccionada
         for (let instance of instancesList) {
-            if (instance.whitelistActive) {
-                let whitelist = instance.whitelist.find(w => w === auth?.name);
-                if (whitelist !== auth?.name && instance.name === instanceSelect) {
-                    let newInstanceSelect = instancesList.find(i => !i.whitelistActive) || instancesList[0];
-                    configClient.instance_selct = newInstanceSelect?.name;
-                    instanceSelect = newInstanceSelect?.name;
-                    setStatus(newInstanceSelect?.status);
-                    await this.db.updateData('configClient', configClient);
-                }
-            } else if (instance.name === instanceSelect) setStatus(instance.status);
+            if (instance.name === instanceSelect) {
+                setStatus(instance.status);
+                break;
+            }
         }
 
         // Aplicar fondo inicial de la instancia seleccionada (si existe)
@@ -284,24 +272,13 @@ class Home {
         instanceBTN.addEventListener('click', async () => {
             instancesListPopup.innerHTML = '';
 
-            let availableInstances = [];
-            
-            for (let instance of instancesList) {
-                // Filtrar por whitelist
-                if (instance.whitelistActive) {
-                    if (!instance.whitelist.includes(auth?.name)) continue;
-                }
-                
-                availableInstances.push(instance);
-            }
-
-            if (availableInstances.length === 0) {
+            if (instancesList.length === 0) {
                 instancesListPopup.innerHTML = `<div class="no-instances">No hay instancias activas disponibles</div>`;
             } else {
                 instancesListPopup.innerHTML = '';
                 
                 // Renderizar instancias disponibles
-                for (let instance of availableInstances) {
+                for (let instance of instancesList) {
                     const bg = instance.backgroundUrl || instance.background || '';
                     const bannerStyle = bg ? `style="background-image: url('${bg}');"` : '';
                     instancesListPopup.innerHTML += `
@@ -425,6 +402,16 @@ class Home {
             console.error('startGame: no authenticator/account selected');
             new popup().openPopup({ title: 'Error', content: 'No hay una cuenta seleccionada. Inicie sesión primero.', color: 'red', options: true });
             return;
+        }
+
+        // Verificar que el usuario está autorizado para lanzar esta instancia (validación de seguridad)
+        if (options.whitelistActive) {
+            const wl = Array.isArray(options.whitelist) ? options.whitelist : [];
+            if (!wl.includes(authenticator?.name)) {
+                console.error('startGame: Usuario no autorizado para lanzar instancia', configClient.instance_selct, 'usuario:', authenticator?.name);
+                new popup().openPopup({ title: 'Acceso denegado', content: `No tienes permiso para lanzar la instancia ${options.name}.`, color: 'red', options: true });
+                return;
+            }
         }
 
         // Validate loader structure to avoid runtime exceptions

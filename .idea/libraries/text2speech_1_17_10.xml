@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="text2speech-1.17.10">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/.Bridge-Client/libraries/com/mojang/text2speech/1.17.9/text2speech-1.17.9.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
