@@ -385,11 +385,10 @@ class Home {
 
         instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none');
 
-        // Update instance selection on interval
+        // Update instance selection on interval - solo renderizar avatars
         const updateInstanceSelection = async () => {
             try {
                 await this.renderSidebarAvatars();
-                await this.instancesSelect();
             } catch (err) {
                 console.error('Error updating instance selection:', err);
             }
