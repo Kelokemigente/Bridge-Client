@@ -10,10 +10,8 @@ class Login {
         this.config = config;
         this.db = new database();
 
-        // Mostrar panel de selección inicial
         this.showTab('.login-select');
 
-        // Eventos de selección de login
         document.querySelector('.select-microsoft').addEventListener('click', () => {
             this.showMicrosoftLogin();
         });
@@ -22,17 +20,14 @@ class Login {
             this.showOfflineLogin();
         });
 
-        // Cancelar Microsoft
         document.querySelector('.cancel-home').addEventListener('click', () => {
             this.showTab('.login-select');
         });
 
-        // Cancelar Offline
         document.querySelector('.cancel-offline').addEventListener('click', () => {
             this.showTab('.login-select');
         });
 
-        // Cancelar AZauth
         const cancelAZauth = document.querySelector('.cancel-AZauth');
         if(cancelAZauth){
             cancelAZauth.addEventListener('click', () => {
@@ -40,7 +35,6 @@ class Login {
             });
         }
 
-        // Cancelar AZauth-A2F
         const cancelAZauthA2F = document.querySelector('.cancel-AZauth-A2F');
         if(cancelAZauthA2F){
             cancelAZauthA2F.addEventListener('click', () => {
@@ -49,7 +43,6 @@ class Login {
         }
     }
 
-    // Mostrar una pestaña y ocultar las demás
     showTab(selector) {
         document.querySelectorAll('.login-tabs').forEach(tab => {
             tab.style.display = 'none';
@@ -58,13 +51,11 @@ class Login {
         if(tab) tab.style.display = 'block';
     }
 
-    // Mostrar login Microsoft
     showMicrosoftLogin() {
         this.showTab('.login-home');
         this.getMicrosoft();
     }
 
-    // Mostrar login Offline
     showOfflineLogin() {
         this.showTab('.login-offline');
         this.getCrack();
@@ -75,7 +66,6 @@ class Login {
         const popupLogin = new popup();
         const microsoftBtn = document.querySelector('.connect-home');
 
-        // Evitar duplicar listener
         microsoftBtn.replaceWith(microsoftBtn.cloneNode(true));
         const btn = document.querySelector('.connect-home');
 
@@ -109,7 +99,6 @@ class Login {
         const emailOffline = document.querySelector('.email-offline');
         const connectOffline = document.querySelector('.connect-offline');
 
-        // Evitar duplicar listener
         connectOffline.replaceWith(connectOffline.cloneNode(true));
         const btn = document.querySelector('.connect-offline');
 
@@ -147,11 +136,9 @@ class Login {
     }
 
     async getAZauth() {
-        // Aquí tu lógica AZauth como estaba antes
     }
 
     async saveData(connectionData) {
-        // Normalizar el objeto de conexión para asegurar que tiene la propiedad 'name'
         if (!connectionData.name && connectionData.profile?.name) {
             connectionData.name = connectionData.profile.name;
             console.log(`[Login] Microsoft account normalized: name=${connectionData.name}`);
@@ -163,7 +150,6 @@ class Login {
         const configClient = await this.db.readData('configClient');
         const account = await this.db.createData('accounts', connectionData);
         
-        // Verificar que createData preservó la propiedad 'name'
         if (!account.name && account.profile?.name) {
             account.name = account.profile.name;
             console.log(`[Login] Account name needed re-normalization after createData: ${account.name}`);
@@ -172,10 +158,8 @@ class Login {
         const instanceSelect = configClient.instance_selct;
         const instancesList = await config.getInstanceList();
 
-        // Select the newly created account
         configClient.account_selected = account.ID;
 
-        // Ensure instance selection respects whitelist after adding account
         try {
             for (let instance of instancesList) {
                 if (instance.whitelistActive) {
@@ -193,10 +177,8 @@ class Login {
             console.warn('Error while adjusting instance selection for new account:', err);
         }
 
-        // Persist config changes
         await this.db.updateData('configClient', configClient);
 
-        // Update UI; be defensive: if addAccount/accountSelect fail, still attempt to go Home
         try {
             await addAccount(account);
         } catch (err) {

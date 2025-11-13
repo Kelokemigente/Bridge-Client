@@ -19,9 +19,7 @@ class Home {
         document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'));
     }
 
-    // Método auxiliar para filtrar instancias autorizadas por whitelist y contraseña
     async filterAuthorizedInstances(instancesList, authName) {
-        // Obtener instancias desbloqueadas de la BD
         let unlockedData = {};
         try {
             unlockedData = await this.db.readData('unlockedInstances') || {};
@@ -30,17 +28,13 @@ class Home {
             console.warn('Error reading unlocked instances from DB:', e);
         }
 
-        // Validar que los códigos de instancias desbloqueadas sigan siendo iguales
-        // Si el código cambió en el servidor, limpiar ese desbloqueo
         let needsUpdate = false;
         for (let instanceName in unlockedData) {
             const unlockedInfo = unlockedData[instanceName];
-            // Soportar formato antiguo (true/false) y nuevo (objeto con código)
             const savedCode = typeof unlockedInfo === 'object' ? unlockedInfo.code : null;
             
             const currentInstance = instancesList.find(i => i.name === instanceName);
             if (currentInstance && currentInstance.password) {
-                // Si no hay código guardado, o si cambió, limpiar el desbloqueo
                 if (!savedCode || savedCode !== currentInstance.password) {
                     const reason = !savedCode ? 'no code stored' : 'code mismatch';
                     console.log(`🔄 ${reason} for "${instanceName}" - clearing unlock`);
@@ -48,7 +42,6 @@ class Home {
                     needsUpdate = true;
                 }
             } else {
-                // Si la instancia ya no existe o no tiene contraseña, limpiar
                 if (currentInstance && !currentInstance.password) {
                     console.log(`🔄 Password removed from "${instanceName}" - clearing unlock`);
                     delete unlockedData[instanceName];
@@ -57,10 +50,8 @@ class Home {
             }
         }
 
-        // Guardar cambios si hubo limpieza
         if (needsUpdate) {
             try {
-                // Remover el campo ID antes de guardar (es metadata de la BD, no del contenido)
                 const dataToSave = { ...unlockedData };
                 delete dataToSave.ID;
                 await this.db.updateData('unlockedInstances', dataToSave);
@@ -70,27 +61,28 @@ class Home {
             }
         }
 
-        // Filtrar instancias desbloqueadas
         const unlockedInstances = Object.keys(unlockedData).filter(key => {
             const info = unlockedData[key];
             return info === true || (typeof info === 'object' && info !== null);
         });
 
         const filtered = instancesList.filter(instance => {
-            // Si la instancia tiene contraseña, solo mostrar si está desbloqueada
             if (instance.password) {
                 const isUnlocked = unlockedInstances.includes(instance.name);
                 console.log(`Instance "${instance.name}" has password, unlocked=${isUnlocked}`);
                 return isUnlocked;
             }
 
-            // Si tiene whitelist, validar
             if (instance.whitelistActive) {
                 const wl = Array.isArray(instance.whitelist) ? instance.whitelist : [];
-                return wl.includes(authName);
+                const unlockInfo = unlockedData[instance.name];
+                const unlockedUsers = (unlockInfo && Array.isArray(unlockInfo.users)) ? unlockInfo.users : [];
+                
+                const isAuthorized = wl.includes(authName) || unlockedUsers.includes(authName);
+                console.log(`Instance "${instance.name}" has whitelist=[${wl.join(', ')}], unlockedUsers=[${unlockedUsers.join(', ')}], authName=${authName}, authorized=${isAuthorized}`);
+                return isAuthorized;
             }
 
-            // Si no tiene restricciones, siempre está disponible
             return true;
         });
         
@@ -98,7 +90,6 @@ class Home {
         return filtered;
     }
 
-    // Establece el fondo del launcher, con precarga y fallback
     setBackground(url) {
         try {
             if (!url) {
@@ -123,8 +114,6 @@ class Home {
             document.body.style.backgroundImage = '';
         }
     }
-
-    // (removed) debug overlay helper — debug UI was temporary and removed
 
     async news() {
         let newsElement = document.querySelector('.news-list');
@@ -211,23 +200,19 @@ class Home {
         });
     }
 
-    // Render circular instance avatars in the sidebar and wire clicks to change instance
     async renderSidebarAvatars() {
         try {
             let configClient = await this.db.readData('configClient');
             let auth = await this.db.readData('accounts', configClient.account_selected);
             let allInstances = await config.getInstanceList();
-            // Filtrar solo instancias autorizadas
             let instancesList = await this.filterAuthorizedInstances(allInstances, auth?.name);
             const container = document.querySelector('.instance-avatars');
             if (!container) return;
 
-            // Debug: log instances returned from server and current auth
             console.debug('renderSidebarAvatars: auth=', auth?.name, 'authorized instances=', instancesList.map(i => i.name));
 
             container.innerHTML = '';
 
-            // Reusable tooltip element for instance names on hover
             let tooltip = document.querySelector('.instance-tooltip');
             if (!tooltip) {
                 tooltip = document.createElement('div');
@@ -245,27 +230,23 @@ class Home {
                 el.className = 'instance-avatar';
                 el.dataset.name = instance.name;
 
-                // set avatar image (prefer avatar field; fallback to background or a default icon)
                 if (avatar) el.style.backgroundImage = `url('${avatar}')`;
                 else if (bg) el.style.backgroundImage = `url('${bg}')`;
                 else el.style.backgroundImage = `url('${defaultAvatar}')`;
 
                 if (configClient.instance_selct === instance.name) el.classList.add('active');
 
-                // Show tooltip on hover with the instance name
                 el.addEventListener('mouseenter', (ev) => {
                     try {
                         let tooltipText = instance.name;
                         tooltip.textContent = tooltipText;
                         tooltip.style.display = 'block';
-                        // position tooltip to the right of avatar by default
                         const rect = el.getBoundingClientRect();
                         tooltip.style.top = `${rect.top + rect.height / 2}px`;
                         tooltip.style.left = `${rect.right + 10}px`;
                     } catch (err) { }
                 });
                 el.addEventListener('mousemove', (ev) => {
-                    // follow cursor a bit to avoid blocking the avatar
                     tooltip.style.top = `${ev.clientY + 12}px`;
                     tooltip.style.left = `${ev.clientX + 12}px`;
                 });
@@ -275,19 +256,15 @@ class Home {
 
                 el.addEventListener('click', async () => {
                     try {
-                        // update visual selection
                         const prev = container.querySelector('.instance-avatar.active');
                         if (prev) prev.classList.remove('active');
                         el.classList.add('active');
 
-                        // persist selection
                         configClient.instance_selct = instance.name;
                         await this.db.updateData('configClient', configClient);
 
-                        // Notificar al Rich Presence sobre el cambio de instancia
                         ipcRenderer.send('instance-changed', { instanceName: instance.name });
 
-                        // apply background and status
                         try { this.setBackground(bg || null); } catch (e) { }
                         try { setStatus(instance.status); } catch (e) { }
                     } catch (err) { console.warn('Error al seleccionar instancia desde sidebar:', err); }
@@ -304,7 +281,6 @@ class Home {
         let configClient = await this.db.readData('configClient');
         let auth = await this.db.readData('accounts', configClient.account_selected);
         let allInstances = await config.getInstanceList();
-        // Filtrar solo instancias autorizadas
         let instancesList = await this.filterAuthorizedInstances(allInstances, auth?.name);
         
         let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct)
@@ -317,7 +293,6 @@ class Home {
         let instancesListPopup = document.querySelector('.instances-List');
         let instanceCloseBTN = document.querySelector('.close-popup');
 
-        // Siempre mostrar el botón de instancias
         instanceBTN.style.display = 'flex';
 
         if (!instanceSelect && instancesList.length > 0) {
@@ -326,7 +301,6 @@ class Home {
             await this.db.updateData('configClient', configClient);
         }
 
-        // Aplicar status de la instancia seleccionada
         for (let instance of instancesList) {
             if (instance.name === instanceSelect) {
                 setStatus(instance.status);
@@ -334,15 +308,12 @@ class Home {
             }
         }
 
-        // Aplicar fondo inicial de la instancia seleccionada (si existe)
         try {
             let currentOption = instancesList.find(i => i.name === instanceSelect);
             if (currentOption) this.setBackground(currentOption.backgroundUrl || currentOption.background || null);
         } catch (e) { console.warn('Error aplicando fondo inicial:', e); }
 
-        // Botón selector de instancia abre popup
         instanceBTN.addEventListener('click', async () => {
-            // Guardar el fondo actual ANTES de abrir el popup (para restaurarlo después)
             const previousBackground = this.currentBackground;
             
             instancesListPopup.innerHTML = '';
@@ -352,7 +323,6 @@ class Home {
             } else {
                 instancesListPopup.innerHTML = '';
                 
-                // Renderizar instancias disponibles
                 for (let instance of instancesList) {
                     const bg = instance.backgroundUrl || instance.background || '';
                     const bannerStyle = bg ? `style="background-image: url('${bg}');"` : '';
@@ -367,7 +337,6 @@ class Home {
                 }
             }
 
-            // Prepare hover preview handlers (avoid duplicates by defining once per open)
             const onHover = e => {
                 const el = e.target.closest('.instance-card');
                 if (!el) return;
@@ -378,12 +347,10 @@ class Home {
             const onLeave = e => {
                 const related = e.relatedTarget;
                 if (!instancesListPopup.contains(related)) {
-                    // Restaurar el fondo guardado ANTES de abrir el popup
                     this.setBackground(previousBackground || null);
                 }
             };
 
-            // Remove previous listeners (no-op if not present) and add
             instancesListPopup.removeEventListener('mouseover', onHover);
             instancesListPopup.removeEventListener('mouseout', onLeave);
             instancesListPopup.addEventListener('mouseover', onHover);
@@ -392,9 +359,6 @@ class Home {
             instancePopup.style.display = 'flex';
         });
 
-
-
-        // Selección de instancia en popup
         instancePopup.addEventListener('click', async e => {
             const instanceEl = e.target.closest('.instance-card');
             if (instanceEl) {
@@ -411,121 +375,171 @@ class Home {
                 await this.db.updateData('configClient', configClient);
                 instanceSelect = newInstanceSelect;
 
-                // Notificar al Rich Presence sobre el cambio de instancia
                 ipcRenderer.send('instance-changed', { instanceName: newInstanceSelect });
 
                 await setStatus(instance.status);
-                // Apply background for selected instance
                 try { this.setBackground(instance.backgroundUrl || instance.background || null); } catch (e) { }
                 instancePopup.style.display = 'none';
             }
         });
 
-        // Cerrar popup
         instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none');
 
-        // Lógica de desbloqueo con código
-        const codeInput = document.querySelector('.code-unlock-input');
-        const unlockButton = document.querySelector('.code-unlock-button');
-        const messageDiv = document.querySelector('.code-unlock-message');
+        // Update instance selection on interval
+        const updateInstanceSelection = async () => {
+            try {
+                await this.renderSidebarAvatars();
+                await this.instancesSelect();
+            } catch (err) {
+                console.error('Error updating instance selection:', err);
+            }
+        };
 
-        if (unlockButton) {
-            unlockButton.addEventListener('click', async () => {
-                const code = codeInput.value.trim();
-                if (!code) {
-                    messageDiv.textContent = 'Please enter a code';
-                    messageDiv.style.color = 'red';
-                    return;
-                }
+        updateInstanceSelection();
 
-                // Buscar instancia con ese código en TODAS las instancias (incluyendo las ocultas)
-                const matchedInstance = allInstances.find(inst => inst.password && inst.password === code);
+        setInterval(() => {
+            updateInstanceSelection();
+        }, 2500);
+        
+        // Code unlock functionality
+        const codeInput = document.querySelector(".code-unlock-input");
+        const unlockButton = document.querySelector(".code-unlock-button");
+        const messageDiv = document.querySelector(".code-unlock-message");
 
-                if (!matchedInstance) {
-                    messageDiv.textContent = 'Invalid code';
-                    messageDiv.style.color = 'red';
-                    codeInput.value = '';
-                    return;
-                }
-
-                // Guardar en BD que esta instancia está desbloqueada
-                try {
-                    console.log(`🔓 Starting unlock process for: ${matchedInstance.name}`);
-                    let unlockedData = await this.db.readData('unlockedInstances') || {};
-                    console.log(`📊 Current unlockedInstances from DB: ${JSON.stringify(unlockedData)}`);
-                    
-                    // Guardar con el código para validar cambios futuros
-                    unlockedData[matchedInstance.name] = {
-                        code: matchedInstance.password,
-                        unlockedAt: new Date().toISOString()
-                    };
-                    console.log(`📝 Updated unlockedInstances to save: ${JSON.stringify(unlockedData)}`);
-                    
-                    // Remover el campo ID antes de guardar (es metadata de la BD, no del contenido)
-                    const dataToSave = { ...unlockedData };
-                    delete dataToSave.ID;
-                    
-                    // Si el registro no existe, créalo; si existe, actualízalo
-                    let readCheck = await this.db.readData('unlockedInstances');
-                    if (!readCheck) {
-                        await this.db.createData('unlockedInstances', dataToSave);
-                        console.log(`✅ Created new record in DB`);
-                    } else {
-                        await this.db.updateData('unlockedInstances', dataToSave);
-                        console.log(`✅ Updated existing record in DB`);
-                    }
-
-                    messageDiv.textContent = `✓ ${matchedInstance.name} desbloqueada exitosamente! Cargando...`;
-                    messageDiv.style.color = 'green';
-                    codeInput.value = '';
-                    console.log(`🎉 Instance unlocked: ${matchedInstance.name}`);
-
-                    instancePopup.style.display = 'none';
-                    setTimeout(async () => {
-                        try {
-                            await this.renderSidebarAvatars();
-                            console.log(`👥 renderSidebarAvatars completed`);
-                            await this.instancesSelect();
-                            console.log(`📋 instancesSelect completed`);
-                            // Reabre el popup automáticamente para mostrar la instancia desbloqueada
-                            setTimeout(() => {
-                                instancePopup.style.display = 'flex';
-                                console.log(`📂 Popup reopened`);
-                            }, 300);
-                        } catch (reloadErr) {
-                            console.error(`❌ Error during reload: ${reloadErr.message}`);
-                            console.error(`Stack: ${reloadErr.stack}`);
-                            messageDiv.textContent = 'Error reloading instances: ' + reloadErr.message;
-                            messageDiv.style.color = 'red';
-                        }
-                    }, 600);
-                } catch (e) {
-                    console.error(`❌ Error unlocking instance: ${e.message}`);
-                    console.error(`📍 Stack: ${e.stack}`);
-                    messageDiv.textContent = 'Error unlocking instance: ' + e.message;
-                    messageDiv.style.color = 'red';
+        if (codeInput && unlockButton) {
+            codeInput.addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    unlockButton.click();
                 }
             });
 
-            // También permitir Enter para enviar
-            if (codeInput) {
-                codeInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') unlockButton.click();
-                });
-            }
+            unlockButton.addEventListener("click", async () => {
+                let codigo = codeInput.value.trim();
+                if (!codigo) {
+                    messageDiv.textContent = '❌ Por favor ingresa un código';
+                    messageDiv.style.color = 'red';
+                    return;
+                }
+                
+                codeInput.value = "";
+          
+                let configClient = await this.db.readData("configClient");
+
+                if (!configClient.account_selected) {
+                    const allAccounts = await this.db.readAllData("accounts");
+                    if (allAccounts.length > 0) {
+                        configClient.account_selected = allAccounts[0].ID;
+                        await this.db.updateData("configClient", configClient);
+                    }
+                }
+                
+                let cuenta = await this.db.readData("accounts", configClient.account_selected);
+                console.log("Cuenta cargada:", cuenta);
+                
+                let usuario = (cuenta && cuenta.name) || "Invitado";
+                console.log("Usuario detectado:", usuario);
+              
+                try {
+                    const response = await fetch(`http://mc.paellahosting.com:49158/api/validate.php`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            codigo: codigo,
+                            usuario: usuario,
+                        }),
+                    });
+
+                    const data = await response.json();
+                    console.info("Respuesta del servidor:", data);
+          
+                    if (data.status === "success") {
+                        console.info("✅ Acceso concedido a la instancia");
+                        
+                        try {
+                            // Obtener la instancia desde el servidor si está disponible
+                            const instanceName = data.instanceName || data.instance;
+                            
+                            if (instanceName) {
+                                // Guardar el usuario en la BD bajo la instancia
+                                let unlockedData = await this.db.readData('unlockedInstances') || {};
+                                
+                                if (!unlockedData[instanceName]) {
+                                    unlockedData[instanceName] = { users: [] };
+                                }
+                                
+                                if (!Array.isArray(unlockedData[instanceName].users)) {
+                                    unlockedData[instanceName].users = [];
+                                }
+                                
+                                if (!unlockedData[instanceName].users.includes(usuario)) {
+                                    unlockedData[instanceName].users.push(usuario);
+                                }
+                                
+                                const dataToSave = { ...unlockedData };
+                                delete dataToSave.ID;
+                                await this.db.updateData('unlockedInstances', dataToSave);
+                                
+                                console.log(`👤 Usuario ${usuario} agregado a instancia ${instanceName} en BD`);
+                            }
+                            
+                            if (messageDiv) {
+                                messageDiv.textContent = `✅ ¡Código canjeado exitosamente! Instancia desbloqueada.`;
+                                messageDiv.style.color = 'green';
+                            }
+                            
+                            setTimeout(async () => {
+                                await updateInstanceSelection();
+                                if (messageDiv) {
+                                    setTimeout(() => {
+                                        messageDiv.textContent = '';
+                                    }, 2000);
+                                }
+                            }, 500);
+                        } catch (e) {
+                            console.error("Error procesando acceso:", e);
+                            if (messageDiv) {
+                                messageDiv.textContent = 'Error procesando el acceso.';
+                                messageDiv.style.color = 'red';
+                            }
+                        }
+                    } else if (data.status === "error" && data.message === "Ya tienes acceso a esta instancia") {
+                        console.info("⚠️ El usuario ya tiene acceso a esta instancia.");
+                        if (messageDiv) {
+                            messageDiv.textContent = '⚠️ Ya tienes acceso a esta instancia.';
+                            messageDiv.style.color = 'orange';
+                        }
+                        setTimeout(() => {
+                            updateInstanceSelection();
+                        }, 100);
+                    } else {
+                        console.error("❌ Instancia no encontrada o código inválido.");
+                        if (messageDiv) {
+                            messageDiv.textContent = '❌ Código inválido o instancia no encontrada.';
+                            messageDiv.style.color = 'red';
+                        }
+                    }
+                } catch (error) {
+                    console.error("❌ Error en la petición:", error);
+                    if (messageDiv) {
+                        messageDiv.textContent = '❌ Error al conectar con el servidor.';
+                        messageDiv.style.color = 'red';
+                    }
+                }
+            });
+        } else {
+            console.warn('Code unlock elements not found in DOM');
         }
 
-        // Botón Jugar
         playBTN.addEventListener('click', () => this.startGame());
     }
 
     async startGame() {
-        // startGame called
         const rawConfig = await this.db.readData('configClient');
         let configClient = rawConfig || {};
         let needPersist = false;
 
-        // Defensive defaults in case DB record is missing or partially populated
         if (!rawConfig || typeof rawConfig !== 'object') {
             needPersist = true;
             configClient = {
@@ -537,7 +551,6 @@ class Home {
             };
         }
 
-        // Ensure nested configs exist
         if (!configClient.launcher_config) { configClient.launcher_config = { download_multi: 5, theme: 'auto', closeLauncher: 'close-launcher', intelEnabledMac: true }; needPersist = true; }
         if (!configClient.java_config) { configClient.java_config = { java_path: null, java_memory: { min: 2, max: 4 } }; needPersist = true; }
         if (!configClient.java_config.java_memory) { configClient.java_config.java_memory = { min: 2, max: 4 }; needPersist = true; }
@@ -555,7 +568,6 @@ class Home {
         const infoStarting = document.querySelector(".info-starting-game-text");
         const progressBar = document.querySelector('.progress-bar');
 
-        // Basic validations before building the launch options
         if (!options) {
             console.error('startGame: no options found for selected instance', configClient.instance_selct);
             new popup().openPopup({ title: 'Error', content: 'No se encontró la instancia seleccionada. Revise la configuración.', color: 'red', options: true });
@@ -568,7 +580,6 @@ class Home {
             return;
         }
 
-        // Verificar que el usuario está autorizado para lanzar esta instancia (validación de seguridad)
         if (options.whitelistActive) {
             const wl = Array.isArray(options.whitelist) ? options.whitelist : [];
             if (!wl.includes(authenticator?.name)) {
@@ -578,7 +589,6 @@ class Home {
             }
         }
 
-        // Validate loader structure to avoid runtime exceptions
         if (!options.loadder || typeof options.loadder !== 'object') {
             console.warn('startGame: instance loader info missing or invalid, attempting to continue with defaults', options.name);
         }
@@ -611,7 +621,6 @@ class Home {
             }
         };
 
-        // Create launcher and attach listeners BEFORE starting the launch to avoid missing early events
         const launch = new Launch();
 
         launch.on('extract', () => ipcRenderer.send('main-window-progress-load'));
@@ -656,13 +665,11 @@ class Home {
             new logger(pkg.name, '#7289da');
         });
 
-        // UI - show progress area
         if (playInstanceBTN) playInstanceBTN.style.display = "none";
         if (infoStartingBOX) infoStartingBOX.style.display = "block";
         if (progressBar) progressBar.style.display = "";
         ipcRenderer.send('main-window-progress-load');
 
-        // Set starting popup image to instance avatar (or fallbacks)
         try {
             const startImg = document.querySelector('.starting-icon-big');
             if (startImg) {
@@ -671,11 +678,9 @@ class Home {
             }
         } catch (err) { console.warn('Failed to set starting image:', err); }
 
-        // Start launch (handle both sync and Promise-returning implementations)
         try {
             console.log('Calling launch.Launch with opt:', opt);
             const maybePromise = launch.Launch(opt);
-            // If returns a promise, await to catch immediate rejections
             if (maybePromise && typeof maybePromise.then === 'function') {
                 await maybePromise.catch(launchErr => { throw launchErr; });
             }

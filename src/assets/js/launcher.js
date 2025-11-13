@@ -2,16 +2,13 @@
  * @author Darken
  * @license CC-BY-NC 4.0 - https://creativecommons.org/licenses/by-nc/4.0
  */
-// import panel
 import Login from './panels/login.js';
 import Home from './panels/home.js';
 import Settings from './panels/settings.js';
 
-// import modules
 import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
 const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 
-// libs
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const os = require('os');
@@ -71,7 +68,6 @@ class Launcher {
         });
 
         let maximize = document.querySelector(`.${platform} .frame #maximize`);
-        // Deshabilitar el botón de maximizar - ventana tamaño fijo
         if (maximize) {
             maximize.style.display = 'none';
         }
@@ -158,7 +154,6 @@ class Launcher {
                         continue;
                     }
 
-                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
                     if (!refresh_accounts.name && refresh_accounts.profile?.name) {
                         refresh_accounts.name = refresh_accounts.profile.name;
                         console.log(`[Launcher] Microsoft account refreshed and normalized: name=${refresh_accounts.name}`);
@@ -198,7 +193,6 @@ class Launcher {
                         continue;
                     }
 
-                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
                     if (!refresh_accounts.name && refresh_accounts.profile?.name) {
                         refresh_accounts.name = refresh_accounts.profile.name;
                         console.log(`[Launcher] AZauth account refreshed and normalized: name=${refresh_accounts.name}`);
@@ -229,7 +223,6 @@ class Launcher {
                     if (account.meta.online == false) {
                         let refresh_accounts = await Mojang.login(account.name);
                         
-                        // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
                         if (!refresh_accounts.name && refresh_accounts.profile?.name) {
                             refresh_accounts.name = refresh_accounts.profile.name;
                         }
@@ -253,7 +246,6 @@ class Launcher {
                         continue;
                     }
 
-                    // Normalizar el objeto de cuenta para asegurar que tiene la propiedad 'name'
                     if (!refresh_accounts.name && refresh_accounts.profile?.name) {
                         refresh_accounts.name = refresh_accounts.profile.name;
                         console.log(`[Launcher] Mojang account refreshed and normalized: name=${refresh_accounts.name}`);

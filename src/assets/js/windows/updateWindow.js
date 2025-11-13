@@ -35,14 +35,11 @@ function createWindow() {
         },
     });
 
-    // Quitamos menú
     Menu.setApplicationMenu(null);
     updateWindow.setMenuBarVisibility(false);
 
-    // Cargamos el splash
     updateWindow.loadFile(path.join(`${app.getAppPath()}/src/index.html`));
 
-    // Mostramos la ventana cuando esté lista
     updateWindow.once('ready-to-show', () => {
         if (updateWindow) {
             if (dev) updateWindow.webContents.openDevTools({ mode: 'detach' });
@@ -50,10 +47,8 @@ function createWindow() {
         }
     });
 
-    // Escuchamos eventos desde el splash
     ipcMain.on("main-window-open", () => {
         console.log("Abrir ventana principal del launcher");
-        // Aquí puedes abrir tu ventana principal
     });
 
     ipcMain.on("update-window-close", () => {
@@ -67,7 +62,7 @@ function createWindow() {
     ipcMain.on("update-window-progress", (event, data) => {
         const progress = data.progress / data.size;
         if (updateWindow) {
-            updateWindow.setProgressBar(progress); // Esto se ve en la barra de tareas
+            updateWindow.setProgressBar(progress);
         }
     });
 }

@@ -28,15 +28,12 @@ async function changePanel(id) {
     let panel = document.querySelector(`.${id}`);
     if (!panel) return;
     let active = document.querySelector(`.active`)
-    // remove active class from currently active panel (use remove to avoid toggle-edge cases)
     if (active) active.classList.remove("active");
 
-    // Set default launcher background when switching to settings or login
     if (id === 'settings' || id === 'login') {
         await setBackground(false);
     }
 
-    // Cleanup settings-specific UI state when switching away from settings
     try {
         if (id !== 'settings') {
             const activeSettingsBTN = document.querySelector('.active-settings-BTN');
@@ -50,7 +47,6 @@ async function changePanel(id) {
         console.error('changePanel cleanup error', err);
     }
 
-    // Ensure only the target panel is displayed to avoid overlay issues from positioned children
     try {
         const panels = document.querySelectorAll('.panel');
         panels.forEach(p => {
@@ -62,12 +58,10 @@ async function changePanel(id) {
             }
         })
     } catch (err) {
-        // ignore DOM traversal errors
     }
 
     panel.classList.add("active");
 
-    // Notificar al Rich Presence sobre el cambio de panel
     ipcRenderer.send('panel-changed', { panelName: id });
 }
 

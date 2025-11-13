@@ -23,7 +23,6 @@ class Settings {
 
 
     navBTN() {
-        // Handle tab switching
         document.querySelector('.settings-tabs').addEventListener('click', e => {
             const tab = e.target.closest('.settings-tab');
             if (tab) {
@@ -32,7 +31,6 @@ class Settings {
                 let activeSettingsBTN = document.querySelector('.active-tab')
                 let activeContainerSettings = document.querySelector('.active-panel')
 
-                // Normal tab switch: remove previous active classes, then set the clicked one
                 if (activeSettingsBTN) activeSettingsBTN.classList.remove('active-tab');
                 tab.classList.add('active-tab');
 
@@ -41,21 +39,18 @@ class Settings {
             }
         })
 
-        // Handle close button (save)
         const saveBtn = document.querySelector('#save.settings-close-btn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
                 let activeSettingsBTN = document.querySelector('.active-tab')
                 let activeContainerSettings = document.querySelector('.active-panel')
 
-                // Reset to account tab
                 if (activeSettingsBTN) activeSettingsBTN.classList.remove('active-tab');
                 document.querySelector('#account').classList.add('active-tab');
 
                 if (activeContainerSettings) activeContainerSettings.classList.remove('active-panel');
                 document.querySelector(`#account-tab`).classList.add('active-panel');
 
-                // Hide any temporary UI that could remain (e.g., cancel button in login)
                 const cancelHome = document.querySelector('.cancel-home');
                 if (cancelHome) cancelHome.style.display = 'none';
 
