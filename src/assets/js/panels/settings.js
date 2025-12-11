@@ -65,9 +65,9 @@ class Settings {
             try {
                 let id = e.target.id
                 if (e.target.classList.contains('account')) {
-                    popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
+                    popupAccount.openNotification({
+                        title: 'Conexión',
+                        content: 'Espere por favor...',
                         color: 'var(--color)'
                     })
 
@@ -84,9 +84,9 @@ class Settings {
                 }
 
                 if (e.target.classList.contains("delete-profile")) {
-                    popupAccount.openPopup({
-                        title: 'Connexion',
-                        content: 'Veuillez patienter...',
+                    popupAccount.openNotification({
+                        title: 'Conexión',
+                        content: 'Espere por favor...',
                         color: 'var(--color)'
                     })
                     await this.db.deleteData('accounts', id);
@@ -110,7 +110,7 @@ class Settings {
             } catch (err) {
                 console.error(err)
             } finally {
-                popupAccount.closePopup();
+                popupAccount.closeNotification();
             }
         })
     }

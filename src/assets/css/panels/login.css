@@ -12,16 +12,17 @@
 
 /* Cada pestaña de login */
 .login-tabs {
-    display: none; /* se mostrará según JS */
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 400px; /* más ancho para ser grande */
+    width: 400px;
     padding: 30px;
-    background: var(--background, #fff);
+    background: linear-gradient(135deg, rgba(21, 17, 28, 0.98) 0%, rgba(42, 8, 69, 0.95) 100%);
+    border: 2px solid var(--purple);
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.05);
 }
 
 /* Mostrar pestaña activa */
@@ -43,11 +44,22 @@
     width: 90%;
     margin: 10px 0;
     padding: 12px;
-    border-radius: 25px;
-    border: 2px solid var(--element-color, #0078D4);
-    background: none;
-    color: var(--color, #000);
+    border-radius: 12px;
+    border: 2px solid var(--purple);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color, #ffffff);
     font-size: 1rem;
+    transition: var(--transition);
+    box-shadow: inset 0 0 8px rgba(157, 78, 221, 0.1);
+}
+
+.input-login .email:focus,
+.input-login .password:focus,
+.A2F:focus {
+    outline: none;
+    border: 2px solid var(--purple-light);
+    background: rgba(157, 78, 221, 0.1);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5), inset 0 0 8px rgba(157, 78, 221, 0.1);
 }
 
 /* Contenedor de botones */
@@ -66,17 +78,25 @@
     padding: 12px;
     margin: 10px 0;
     border-radius: 12px;
-    border: 2px solid var(--element-color, #0078D4);
-    background: none;
-    color: var(--color, #000);
+    border: 2px solid var(--purple);
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    color: var(--white);
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s ease-in-out;
+    transition: var(--transition);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
 }
 
 .connect:hover,
 .cancel:hover {
     transform: scale(1.05);
+    border: 2px solid var(--purple-light);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.6);
+    background: linear-gradient(135deg, var(--purple-light) 0%, var(--purple) 100%);
+}
+
+.cancel {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, rgba(106, 10, 173, 0.5) 100%);
 }
 
 /* ===== LOGIN SELECT ESTILO ESPECIAL ===== */

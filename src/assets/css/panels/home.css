@@ -9,16 +9,20 @@
 .status-server {
     position: relative;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    background: var(--background);
-    width: 25rem;
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--background) 100%);
+    width: auto;
     height: 3rem;
     color: var(--color);
-    border-radius: 10px;
+    border-radius: 12px;
     margin-top: 3rem;
     padding: 1rem;
     text-align: center;
+    gap: 1rem;
+    border: 2px solid var(--purple);
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
 }
 
 .server-status-icon {
@@ -41,6 +45,10 @@
     height: 3rem;
     border-radius: 10px;
 }
+
+    .paypal-badge-container { left: 16px; bottom: 78px; }
+    .paypal-badge { width: 120px; }
+
 
 .player-count {
     font-size: 1.5rem;
@@ -148,7 +156,9 @@
     align-items: center;
     width: 90px;
     height: 100vh;
-    background: var(--background-transparent);
+    background: linear-gradient(180deg, rgba(26, 26, 26, 0.95) 0%, rgba(21, 17, 28, 0.98) 100%);
+    border-right: 2px solid var(--purple);
+    box-shadow: inset -5px 0 20px rgba(157, 78, 221, 0.1);
     position: fixed;
     top: 0;
     left: 0;
@@ -173,8 +183,15 @@
     height: 3rem;
     width: 3rem;
     border-radius: 50px;
-    margin-top: -30px;       /* subirlo más al tope */
-    border: 5px solid white; /* borde blanco */
+    margin-top: -30px;
+    border: 3px solid var(--purple);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+.player-head:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.9), inset 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 /* Settings button */
@@ -182,13 +199,17 @@
     width: 3rem;
     height: 3rem;
     font-size: 3rem;
-    color: var(--element-color);
-    margin: 30px 1.5rem 50px 1.5rem; /* bajar más abajo */
-    transition: transform 0.3s ease-in-out;
+    color: var(--purple);
+    margin: 30px 1.5rem 50px 1.5rem;
+    transition: var(--transition);
+    cursor: pointer;
+    filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5));
 }
 
 .settings-btn:hover {
-    transform: scale(1.2);
+    transform: scale(1.25) rotate(20deg);
+    color: var(--accent);
+    filter: drop-shadow(0 0 15px rgba(157, 78, 221, 0.8));
 }
 
 /* Play elements */
@@ -207,9 +228,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: solid 3px var(--element-color);
+    border: solid 3px var(--purple);
     border-radius: 15px;
     height: 3.2rem;
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.5), inset 0 0 12px rgba(255, 255, 255, 0.15);
+    transition: var(--transition);
 }
 
 .play-btn {
@@ -222,11 +246,14 @@
     padding: 0 7rem;
     min-width: 200px;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: var(--transition);
+    text-shadow: 0 0 10px rgba(157, 78, 221, 0.8);
 }
 
 .play-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
+    text-shadow: 0 0 20px rgba(157, 78, 221, 1);
+    filter: brightness(1.2);
 }
 
 /* Instance select button */
@@ -234,20 +261,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: solid 3px var(--element-color);
+    border: solid 3px var(--purple);
     border-radius: 50px;
     padding: 0 1rem;
     height: 3.2rem;
     font-size: 1rem;
-    color: var(--element-color);
+    color: var(--white);
     cursor: pointer;
-    transition: transform 0.3s;
-    margin-top: 490px; /* ajusta este valor según qué tan abajo querís */
+    transition: var(--transition);
+    margin-top: 490px;
+    background: linear-gradient(135deg, var(--purple-dark) 0%, var(--purple) 100%);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
 }
 
 .instance-select:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px var(--element-color);
+    transform: scale(1.12);
+    box-shadow: 0 0 30px var(--purple), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-light) 100%);
 }
 
 /* Info starting game */
@@ -271,19 +301,23 @@
 
 .progress-bar {
     width: 100%;
-    height: 8px;
-    border-radius: 6px;
+    height: 10px;
+    border-radius: 8px;
     overflow: hidden;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
 }
+
 .progress-bar::-webkit-progress-bar {
-    background-color: var(--background);
-    border: solid 1px var(--element-color);
+    background-color: rgba(0, 0, 0, 0.3);
+    border: solid 2px var(--purple);
     border-radius: 10px;
+    box-shadow: inset 0 0 8px rgba(157, 78, 221, 0.2);
 }
 
 .progress-bar::-webkit-progress-value {
-    background-color: var(--element-color);
+    background: linear-gradient(90deg, var(--purple-dark) 0%, var(--purple) 50%, var(--purple-light) 100%);
     border-radius: 10px;
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.8);
 }
 
 /* Imagen cuadrada preview */
@@ -307,11 +341,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--background); /* color de fondo que ya usas */
+    background: linear-gradient(135deg, rgba(21, 17, 28, 0.95) 0%, rgba(42, 8, 69, 0.9) 100%);
+    border: 2px solid var(--purple);
+    box-shadow: 0 0 25px rgba(157, 78, 221, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.05);
     padding: 15px;
-    border-radius: 12px;
+    border-radius: 15px;
     width: 100%;
-    max-width: 600px; /* ancho del recuadro */
+    max-width: 600px;
     margin: 0 auto;
 }
 
@@ -348,7 +384,8 @@
     display: none;
     width: 100%;
     height: 100%;
-    background: #000000b3;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
     z-index: 10;
     flex-direction: column;
     align-items: center;
@@ -358,11 +395,13 @@
 
 .instances-tab {
     position: relative;
-    background: var(--background);
-    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(21, 17, 28, 0.98) 0%, rgba(42, 8, 69, 0.95) 100%);
+    border-radius: 15px;
+    border: 2px solid var(--purple);
     padding: 1rem 3rem;
     width: min(1000px, 92%);
     max-width: 1100px;
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.05);
 }
 
 .close-popup {
@@ -370,12 +409,21 @@
     display: flex;
     top: 10px;
     right: 10px;
-    background: var(--shadow);
+    background: linear-gradient(135deg, var(--purple-dark), var(--purple));
     height: 30px;
     width: 30px;
-    border-radius: 10px;
+    border-radius: 8px;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--purple-light);
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--white);
+}
+
+.close-popup:hover {
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.8);
 }
 
 .instances-tab p {
@@ -384,20 +432,28 @@
 }
 
 .instance-elements {
-    background: var(--background-element);
+    background: linear-gradient(135deg, rgba(42, 8, 69, 0.6) 0%, rgba(26, 26, 26, 0.6) 100%);
     text-align: center;
-    border-radius: 10px;
+    border-radius: 12px;
     margin: 0.5rem 0;
     font-size: 1.5rem;
     cursor: pointer;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    transition: var(--transition);
+    padding: 0.5rem;
 }
 
 .instance-elements:hover {
-    background: var(--element-color);
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    border: 1px solid var(--purple-light);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
+    transform: translateX(5px);
 }
 
 .active-instance {
-    background: var(--element-color);
+    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+    border: 2px solid var(--purple-light);
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.7);
 }
 
 /* Social tab */
@@ -717,6 +773,26 @@
     margin-top: 0.5rem;
     font-weight: bold;
     transition: all 0.3s ease;
+}
+
+.paypal-badge-link {
+    position: fixed;
+    bottom: 20px;
+    left: 110px;
+    z-index: 2;
+    transition: var(--transition);
+}
+
+.paypal-badge {
+    width: 190px;
+    height: auto;
+    filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5));
+    transition: var(--transition);
+}
+
+.paypal-badge-link:hover .paypal-badge {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px rgba(157, 78, 221, 0.8));
 }
 
 

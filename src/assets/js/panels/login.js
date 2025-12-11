@@ -70,7 +70,7 @@ class Login {
         const btn = document.querySelector('.connect-home');
 
         btn.addEventListener("click", () => {
-            popupLogin.openPopup({
+            popupLogin.openNotification({
                 title: 'Conectando',
                 content: 'Espere por favor...',
                 color: 'var(--color)'
@@ -78,13 +78,14 @@ class Login {
 
             ipcRenderer.invoke('Microsoft-window', this.config.client_id).then(async account_connect => {
                 if (!account_connect || account_connect === 'cancel') {
-                    popupLogin.closePopup();
+                    popupLogin.closeNotification();
                     return;
                 }
+                console.log('[Login] Microsoft account_connect data:', account_connect);
                 await this.saveData(account_connect);
-                popupLogin.closePopup();
+                popupLogin.closeNotification();
             }).catch(err => {
-                popupLogin.openPopup({
+                popupLogin.openNotification({
                     title: 'Error',
                     content: err,
                     options: true
@@ -105,7 +106,7 @@ class Login {
         btn.addEventListener('click', async () => {
             const nick = emailOffline.value.trim();
             if (nick.length < 3) {
-                popupLogin.openPopup({
+                popupLogin.openNotification({
                     title: 'Error',
                     content: 'Tu Nick debe tener al menos 3 caracteres.',
                     options: true
@@ -113,7 +114,7 @@ class Login {
                 return;
             }
             if (nick.includes(' ')) {
-                popupLogin.openPopup({
+                popupLogin.openNotification({
                     title: 'Error',
                     content: 'Tu Nick no debe contener espacios.',
                     options: true
@@ -123,7 +124,7 @@ class Login {
 
             const MojangConnect = await Mojang.login(nick);
             if (MojangConnect.error) {
-                popupLogin.openPopup({
+                popupLogin.openNotification({
                     title: 'Error',
                     content: MojangConnect.message,
                     options: true
@@ -131,7 +132,7 @@ class Login {
                 return;
             }
             await this.saveData(MojangConnect);
-            popupLogin.closePopup();
+            popupLogin.closeNotification();
         });
     }
 
@@ -139,20 +140,33 @@ class Login {
     }
 
     async saveData(connectionData) {
+        console.log('[Login] saveData called with:', connectionData);
+        
         if (!connectionData.name && connectionData.profile?.name) {
             connectionData.name = connectionData.profile.name;
             console.log(`[Login] Microsoft account normalized: name=${connectionData.name}`);
         }
         if (!connectionData.name) {
-            console.warn('[Login] Account has no name property!', connectionData);
+            console.warn('[Login] Account has no name property before saveData!', connectionData);
+            connectionData.name = connectionData.profile?.name || connectionData.username || 'Unknown';
+            console.log(`[Login] Assigned fallback name: ${connectionData.name}`);
         }
 
         const configClient = await this.db.readData('configClient');
         const account = await this.db.createData('accounts', connectionData);
         
+        console.log('[Login] Account after createData:', account);
+        
         if (!account.name && account.profile?.name) {
             account.name = account.profile.name;
             console.log(`[Login] Account name needed re-normalization after createData: ${account.name}`);
+            await this.db.updateData('accounts', account, account.ID);
+        }
+        
+        if (!account.name) {
+            console.error('[Login] CRITICAL: Account still has no name after normalization!', account);
+            account.name = account.profile?.name || account.username || 'Unknown';
+            console.log(`[Login] Final fallback name assigned: ${account.name}`);
             await this.db.updateData('accounts', account, account.ID);
         }
         const instanceSelect = configClient.instance_selct;

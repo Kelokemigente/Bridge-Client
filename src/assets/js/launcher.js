@@ -48,7 +48,7 @@ class Launcher {
 
 
     errorConnect() {
-        new popup().openPopup({
+        new popup().openNotification({
             title: this.config.error.code,
             content: this.config.error.message,
             color: 'red',
@@ -135,9 +135,9 @@ class Launcher {
                 }
                 if (account.meta.type === 'Xbox') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
-                    popupRefresh.openPopup({
+                    popupRefresh.openNotification({
                         title: 'Conectando...',
-                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        content: `Actualizando cuenta Type: ${account.meta.type} | Usuario: ${account.name}`,
                         color: 'var(--color)',
                         background: false
                     });
@@ -175,9 +175,9 @@ class Launcher {
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else if (account.meta.type == 'AZauth') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
-                    popupRefresh.openPopup({
+                    popupRefresh.openNotification({
                         title: 'Conectando',
-                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        content: `Actualizando cuenta Type: ${account.meta.type} | Usuario: ${account.name}`,
                         color: 'var(--color)',
                         background: false
                     });
@@ -214,9 +214,9 @@ class Launcher {
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
                 } else if (account.meta.type == 'Mojang') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
-                    popupRefresh.openPopup({
-                        title: 'Connexion',
-                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                    popupRefresh.openNotification({
+                        title: 'Conexión',
+                        content: `Actualizando cuenta Type: ${account.meta.type} | Usuario: ${account.name}`,
                         color: 'var(--color)',
                         background: false
                     });
@@ -291,14 +291,14 @@ class Launcher {
             if (!accounts.length) {
                 config.account_selected = null
                 await this.db.updateData('configClient', config);
-                popupRefresh.closePopup()
+                popupRefresh.closeNotification()
                 return changePanel("login");
             }
 
-            popupRefresh.closePopup()
+            popupRefresh.closeNotification()
             changePanel("home");
         } else {
-            popupRefresh.closePopup()
+            popupRefresh.closeNotification()
             changePanel('login');
         }
     }

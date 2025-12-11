@@ -224,7 +224,7 @@ class Home {
             const defaultAvatar = 'assets/images/icon.png';
             for (let instance of instancesList) {
 
-                const bg = instance.backgroundUrl || instance.background || '';
+                const bg = instance.backgroundUrl || instance.background || null;
                 const avatar = instance.avatarUrl || instance.iconUrl || instance.icon || '';
                 const el = document.createElement('div');
                 el.className = 'instance-avatar';
@@ -265,7 +265,11 @@ class Home {
 
                         ipcRenderer.send('instance-changed', { instanceName: instance.name });
 
-                        try { this.setBackground(bg || null); } catch (e) { }
+                        if (bg) {
+                            this.setBackground(bg);
+                        } else {
+                            this.setBackground(null);
+                        }
                         try { setStatus(instance.status); } catch (e) { }
                     } catch (err) { console.warn('Error al seleccionar instancia desde sidebar:', err); }
                 });
@@ -292,6 +296,41 @@ class Home {
         let instancePopup = document.querySelector('.instance-popup');
         let instancesListPopup = document.querySelector('.instances-List');
         let instanceCloseBTN = document.querySelector('.close-popup');
+        const notificationInstance = new popup();
+        
+        const handleInstanceClick = async e => {
+            const instanceEl = e.target.closest('.instance-card');
+            if (instanceEl) {
+                let newInstanceSelect = instanceEl.id;
+                console.log('Click detected on instance:', newInstanceSelect);
+                let instance = instancesList.find(i => i.name === newInstanceSelect);
+
+                if (!instance) return;
+
+                let active = document.querySelector('.active-instance');
+                if (active) active.classList.remove('active-instance');
+                instanceEl.classList.add('active-instance');
+
+                configClient.instance_selct = newInstanceSelect;
+                await this.db.updateData('configClient', configClient);
+                instanceSelect = newInstanceSelect;
+
+                ipcRenderer.send('instance-changed', { instanceName: newInstanceSelect });
+
+                await setStatus(instance.status);
+                try { this.setBackground(instance.backgroundUrl || instance.background || null); } catch (e) { }
+                
+                console.log('Closing popup, instancePopup element:', instancePopup);
+                instancePopup.style.display = 'none';
+                
+                console.log('Opening notification');
+                notificationInstance.openNotification({
+                    title: 'Instancia Cambiada',
+                    content: `Instancia cambiada a: ${newInstanceSelect}`,
+                    color: 'var(--color)'
+                });
+            }
+        };
 
         instanceBTN.style.display = 'flex';
 
@@ -324,10 +363,10 @@ class Home {
                 instancesListPopup.innerHTML = '';
                 
                 for (let instance of instancesList) {
-                    const bg = instance.backgroundUrl || instance.background || '';
+                    const bg = instance.backgroundUrl || instance.background || null;
                     const bannerStyle = bg ? `style="background-image: url('${bg}');"` : '';
                     instancesListPopup.innerHTML += `
-                        <div id="${instance.name}" class="instance-card${instance.name === instanceSelect ? ' active-instance' : ''}" data-bg="${bg}">
+                        <div id="${instance.name}" class="instance-card${instance.name === instanceSelect ? ' active-instance' : ''}" data-bg="${bg || ''}">
                             <div class="instance-banner" ${bannerStyle}>
                                 <div class="instance-banner-overlay">
                                     <div class="instance-name">${instance.name}</div>
@@ -355,40 +394,84 @@ class Home {
             instancesListPopup.removeEventListener('mouseout', onLeave);
             instancesListPopup.addEventListener('mouseover', onHover);
             instancesListPopup.addEventListener('mouseout', onLeave);
+            
+            instancesListPopup.removeEventListener('click', handleInstanceClick);
+            instancesListPopup.addEventListener('click', handleInstanceClick);
 
             instancePopup.style.display = 'flex';
         });
 
-        instancePopup.addEventListener('click', async e => {
-            const instanceEl = e.target.closest('.instance-card');
-            if (instanceEl) {
-                let newInstanceSelect = instanceEl.id;
-                let instance = instancesList.find(i => i.name === newInstanceSelect);
-
-                if (!instance) return;
-
-                let active = document.querySelector('.active-instance');
-                if (active) active.classList.remove('active-instance');
-                instanceEl.classList.add('active-instance');
-
-                configClient.instance_selct = newInstanceSelect;
-                await this.db.updateData('configClient', configClient);
-                instanceSelect = newInstanceSelect;
-
-                ipcRenderer.send('instance-changed', { instanceName: newInstanceSelect });
-
-                await setStatus(instance.status);
-                try { this.setBackground(instance.backgroundUrl || instance.background || null); } catch (e) { }
-                instancePopup.style.display = 'none';
-            }
-        });
+        let onHover, onLeave;
 
         instanceCloseBTN.addEventListener('click', () => instancePopup.style.display = 'none');
 
-        // Update instance selection on interval - solo renderizar avatars
+        onHover = e => {
+            const el = e.target.closest('.instance-card');
+            if (!el) return;
+            const hoverBg = el.dataset.bg;
+            if (hoverBg) this.setBackground(hoverBg);
+        };
+
+        onLeave = e => {
+            const related = e.relatedTarget;
+            if (!instancesListPopup.contains(related)) {
+                const currentInstance = instancesList.find(i => i.name === instanceSelect);
+                this.setBackground(currentInstance?.backgroundUrl || currentInstance?.background || null);
+            }
+        };
+
+        // Update instance selection on interval - renderizar avatars y actualizar popup
         const updateInstanceSelection = async () => {
             try {
                 await this.renderSidebarAvatars();
+                
+                configClient = await this.db.readData('configClient');
+                auth = await this.db.readData('accounts', configClient.account_selected);
+                allInstances = await config.getInstanceList();
+                instancesList = await this.filterAuthorizedInstances(allInstances, auth?.name);
+                
+                instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct)
+                    ? configClient?.instance_selct
+                    : null;
+
+                if (!instanceSelect && instancesList.length > 0) {
+                    configClient.instance_selct = instancesList[0]?.name;
+                    instanceSelect = instancesList[0]?.name;
+                    await this.db.updateData('configClient', configClient);
+                }
+
+                for (let instance of instancesList) {
+                    if (instance.name === instanceSelect) {
+                        setStatus(instance.status);
+                        break;
+                    }
+                }
+                
+                if (instancePopup.style.display === 'flex') {
+                    instancesListPopup.innerHTML = '';
+                    
+                    if (instancesList.length === 0) {
+                        instancesListPopup.innerHTML = `<div class="no-instances">No hay instancias activas disponibles</div>`;
+                    } else {
+                        for (let instance of instancesList) {
+                            const bg = instance.backgroundUrl || instance.background || null;
+                            const bannerStyle = bg ? `style="background-image: url('${bg}');"` : '';
+                            instancesListPopup.innerHTML += `
+                                <div id="${instance.name}" class="instance-card${instance.name === instanceSelect ? ' active-instance' : ''}" data-bg="${bg || ''}">
+                                    <div class="instance-banner" ${bannerStyle}>
+                                        <div class="instance-banner-overlay">
+                                            <div class="instance-name">${instance.name}</div>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        }
+                    }
+                    
+                    instancesListPopup.removeEventListener('mouseover', onHover);
+                    instancesListPopup.removeEventListener('mouseout', onLeave);
+                    instancesListPopup.addEventListener('mouseover', onHover);
+                    instancesListPopup.addEventListener('mouseout', onLeave);
+                }
             } catch (err) {
                 console.error('Error updating instance selection:', err);
             }
@@ -403,7 +486,6 @@ class Home {
         // Code unlock functionality
         const codeInput = document.querySelector(".code-unlock-input");
         const unlockButton = document.querySelector(".code-unlock-button");
-        const messageDiv = document.querySelector(".code-unlock-message");
 
         if (codeInput && unlockButton) {
             codeInput.addEventListener("keypress", (event) => {
@@ -415,8 +497,11 @@ class Home {
             unlockButton.addEventListener("click", async () => {
                 let codigo = codeInput.value.trim();
                 if (!codigo) {
-                    messageDiv.textContent = '❌ Por favor ingresa un código';
-                    messageDiv.style.color = 'red';
+                    notificationInstance.openNotification({
+                        title: 'Código Requerido',
+                        content: 'Por favor ingresa un código de instancia',
+                        color: '#e21212'
+                    });
                     return;
                 }
                 
@@ -439,7 +524,7 @@ class Home {
                 console.log("Usuario detectado:", usuario);
               
                 try {
-                    const response = await fetch(`http://mc.paellahosting.com:49158/api/validate.php`, {
+                    const response = await fetch(`http://ext2.bytte.cloud:10878/BridgeClient/api/validate.php`, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -483,48 +568,48 @@ class Home {
                                 console.log(`👤 Usuario ${usuario} agregado a instancia ${instanceName} en BD`);
                             }
                             
-                            if (messageDiv) {
-                                messageDiv.textContent = `✅ ¡Código canjeado exitosamente! Instancia desbloqueada.`;
-                                messageDiv.style.color = 'green';
-                            }
+                            notificationInstance.openNotification({
+                                title: 'Éxito',
+                                content: '¡Código canjeado exitosamente! Instancia desbloqueada.',
+                                color: '#4CAF50'
+                            });
                             
                             setTimeout(async () => {
                                 await updateInstanceSelection();
-                                if (messageDiv) {
-                                    setTimeout(() => {
-                                        messageDiv.textContent = '';
-                                    }, 2000);
-                                }
                             }, 500);
                         } catch (e) {
                             console.error("Error procesando acceso:", e);
-                            if (messageDiv) {
-                                messageDiv.textContent = 'Error procesando el acceso.';
-                                messageDiv.style.color = 'red';
-                            }
+                            notificationInstance.openNotification({
+                                title: 'Error',
+                                content: 'Error procesando el acceso.',
+                                color: '#e21212'
+                            });
                         }
                     } else if (data.status === "error" && data.message === "Ya tienes acceso a esta instancia") {
                         console.info("⚠️ El usuario ya tiene acceso a esta instancia.");
-                        if (messageDiv) {
-                            messageDiv.textContent = '⚠️ Ya tienes acceso a esta instancia.';
-                            messageDiv.style.color = 'orange';
-                        }
+                        notificationInstance.openNotification({
+                            title: 'Acceso Duplicado',
+                            content: 'Ya tienes acceso a esta instancia.',
+                            color: '#FFC107'
+                        });
                         setTimeout(() => {
                             updateInstanceSelection();
                         }, 100);
                     } else {
                         console.error("❌ Instancia no encontrada o código inválido.");
-                        if (messageDiv) {
-                            messageDiv.textContent = '❌ Código inválido o instancia no encontrada.';
-                            messageDiv.style.color = 'red';
-                        }
+                        notificationInstance.openNotification({
+                            title: 'Código Inválido',
+                            content: 'Código inválido o instancia no encontrada.',
+                            color: '#e21212'
+                        });
                     }
                 } catch (error) {
                     console.error("❌ Error en la petición:", error);
-                    if (messageDiv) {
-                        messageDiv.textContent = '❌ Error al conectar con el servidor.';
-                        messageDiv.style.color = 'red';
-                    }
+                    notificationInstance.openNotification({
+                        title: 'Error de Conexión',
+                        content: 'Error al conectar con el servidor.',
+                        color: '#e21212'
+                    });
                 }
             });
         } else {

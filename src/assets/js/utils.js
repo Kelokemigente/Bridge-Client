@@ -11,7 +11,7 @@ const pkg = require('../package.json');
 import config from './utils/config.js';
 import database from './utils/database.js';
 import logger from './utils/logger.js';
-import popup from './utils/popup.js';
+import notification from './utils/notification.js';
 import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
 
@@ -76,13 +76,15 @@ async function addAccount(data) {
     div.classList.add("account");
     div.id = data.ID;
     div.innerHTML = `
-        <div class="profile-image" ${skin ? 'style="background-image: url(' + skin + ');"' : ''}></div>
-        <div class="profile-infos">
-            <div class="profile-pseudo">${data.name}</div>
-            <div class="profile-uuid">${data.uuid}</div>
-        </div>
-        <div class="delete-profile" id="${data.ID}">
-            <div class="icon-account-delete delete-profile-icon"></div>
+        <div class="account-card">
+            <div class="profile-image" ${skin ? 'style="background-image: url(' + skin + ');"' : ''}></div>
+            <div class="profile-infos">
+                <div class="profile-pseudo">${data.name || data.profile?.name || 'Unknown'}</div>
+                <div class="profile-uuid">${data.uuid}</div>
+            </div>
+            <div class="delete-profile" id="${data.ID}">
+                <div class="icon-account-delete delete-profile-icon"></div>
+            </div>
         </div>
     `
     return document.querySelector('.accounts-list').appendChild(div);
@@ -140,7 +142,7 @@ export {
     config as config,
     database as database,
     logger as logger,
-    popup as popup,
+    notification as popup,
     setBackground as setBackground,
     skin2D as skin2D,
     addAccount as addAccount,

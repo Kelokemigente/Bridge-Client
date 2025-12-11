@@ -1,7 +1,7 @@
 {
     "name": "Bridge-Client",
     "preductname": "Bridge Client",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Cliente Oficial de Bridge Studio",
     "main": "src/app.js",
     "author": {
@@ -9,7 +9,7 @@
         "email": "itzaearrieta090@gmail.com",
         "url": "https://github.com/Kelokemigente"
     },
-    "url": "http://mc.paellahosting.com:49158/main",
+    "url": "http://ext2.bytte.cloud:10878/BridgeClient",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
