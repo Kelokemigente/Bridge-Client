@@ -1,7 +1,7 @@
 {
     "name": "Bridge-Client",
     "preductname": "Bridge Client",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "description": "Cliente Oficial de Bridge Studio",
     "main": "src/app.js",
     "author": {
